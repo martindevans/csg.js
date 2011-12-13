@@ -45,50 +45,50 @@ namespace Xna.Csg
 
         public static BSP Union(BSP aInput, BSP bInput)
         {
-            var a = aInput.Clone();
-            var b = bInput.Clone();
+            var a = aInput.root.Clone();
+            var b = bInput.root.Clone();
 
-            a.root.ClipTo(b.root);
-            b.root.ClipTo(a.root);
-            b.root.Invert();
-            b.root.ClipTo(a.root);
-            b.root.Invert();
-            a.root.Build(b.root.AllPolygons);
+            a.ClipTo(b);
+            b.ClipTo(a);
+            b.Invert();
+            b.ClipTo(a);
+            b.Invert();
+            a.Build(b.AllPolygons);
 
-            return a;
+            return new BSP(a.AllPolygons);
         }
 
         public static BSP Subtract(BSP aInput, BSP bInput)
         {
-            var a = aInput.Clone();
-            var b = bInput.Clone();
+            var a = aInput.root.Clone();
+            var b = bInput.root.Clone();
 
-            a.root.Invert();
-            a.root.ClipTo(b.root);
-            b.root.ClipTo(a.root);
-            b.root.Invert();
-            b.root.ClipTo(a.root);
-            b.root.Invert();
-            a.root.Build(b.root.AllPolygons);
-            a.root.Invert();
+            a.Invert();
+            a.ClipTo(b);
+            b.ClipTo(a);
+            b.Invert();
+            b.ClipTo(a);
+            b.Invert();
+            a.Build(b.AllPolygons);
+            a.Invert();
 
-            return a;
+            return new BSP(a.AllPolygons);
         }
 
         public static BSP Intersect(BSP aInput, BSP bInput)
         {
-            var a = aInput.Clone();
-            var b = bInput.Clone();
+            var a = aInput.root.Clone();
+            var b = bInput.root.Clone();
 
-            a.root.Invert();
-            b.root.ClipTo(a.root);
-            b.root.Invert();
-            a.root.ClipTo(b.root);
-            b.root.ClipTo(a.root);
-            a.root.Build(b.root.AllPolygons);
-            a.root.Invert();
+            a.Invert();
+            b.ClipTo(a);
+            b.Invert();
+            a.ClipTo(b);
+            b.ClipTo(a);
+            a.Build(b.AllPolygons);
+            a.Invert();
 
-            return a;
+            return new BSP(a.AllPolygons);
         }
 
         public static BSP Cube(Vector3 center, float radius)
@@ -168,6 +168,9 @@ namespace Xna.Csg
 
             public IEnumerable<Polygon> ClipPolygons(IList<Polygon> polygons)
             {
+                if (!splitPlane.HasValue)
+                    return polygons.ToArray();
+
                 List<Polygon> front = new List<Polygon>();
                 List<Polygon> back = new List<Polygon>();
 
@@ -178,6 +181,8 @@ namespace Xna.Csg
                     front = this.front.ClipPolygons(front).ToList();
                 if (this.back != null)
                     back = this.back.ClipPolygons(back).ToList();
+                else
+                    back.Clear();
 
                 return front.Concat(back);
             }
