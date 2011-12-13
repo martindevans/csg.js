@@ -14,7 +14,7 @@ namespace Xna.Csg
         Spanning = 3
     }
 
-    public struct Polygon
+    public class Polygon
     {
         public readonly Plane Plane;
 
@@ -37,6 +37,11 @@ namespace Xna.Csg
         public Polygon Flip()
         {
             return new Polygon(Vertices.Select(a => a.Flip()).Reverse());
+        }
+
+        public Polygon Clone()
+        {
+            return new Polygon(Vertices);
         }
     }
 }

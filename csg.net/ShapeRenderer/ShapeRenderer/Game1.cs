@@ -17,10 +17,17 @@ namespace ShapeRenderer
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        float controlSpeed = 0.03f;
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        BSP bspTree;
+        BSP bspTreeA;
+        BSP bspTreeB;
+
+        BSP union;
+        BSP intersection;
+        BSP subtract;
 
         Vector2 rotation;
         BasicEffect effect;
@@ -40,7 +47,12 @@ namespace ShapeRenderer
         /// </summary>
         protected override void Initialize()
         {
-            bspTree = BSP.Cube(Vector3.Zero, 5);
+            bspTreeA = BSP.Cube(new Vector3(0, 0, 0), 4);
+            bspTreeB = BSP.Cube(new Vector3(4, 4, 4), 4);
+
+            union = BSP.Union(bspTreeA, bspTreeB);
+            intersection = BSP.Intersect(bspTreeA, bspTreeB);
+            subtract = BSP.Subtract(bspTreeA, bspTreeB);
 
             base.Initialize();
         }
@@ -70,13 +82,13 @@ namespace ShapeRenderer
         protected override void Update(GameTime gameTime)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.A))
-                rotation.X--;
+                rotation.X += controlSpeed;
             if (Keyboard.GetState().IsKeyDown(Keys.D))
-                rotation.X++;
+                rotation.X -= controlSpeed;
             if (Keyboard.GetState().IsKeyDown(Keys.W))
-                rotation.Y++;
+                rotation.Y += controlSpeed;
             if (Keyboard.GetState().IsKeyDown(Keys.S))
-                rotation.Y--;
+                rotation.Y -= controlSpeed;
 
             base.Update(gameTime);
         }
@@ -89,28 +101,35 @@ namespace ShapeRenderer
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            effect.World = Matrix.CreateScale(27) * Matrix.CreateRotationY(rotation.X) * Matrix.CreateRotationZ(rotation.Y);
-            effect.View = Matrix.CreateLookAt(Vector3.Transform(new Vector3(25, 20, 10), Matrix.Identity), Vector3.Zero, Vector3.Up);
-            effect.Projection = Matrix.CreatePerspectiveFieldOfView(2, GraphicsDevice.Viewport.AspectRatio, 1, 100);
+            effect.World = Matrix.CreateScale(2) * Matrix.CreateRotationY(rotation.X) * Matrix.CreateRotationZ(rotation.Y);
+            effect.View = Matrix.CreateLookAt(new Vector3(25, 20, 10), Vector3.Zero, Vector3.Up);
+            effect.Projection = Matrix.CreatePerspectiveFieldOfView(2, GraphicsDevice.Viewport.AspectRatio, 1, 1000);
             effect.VertexColorEnabled = true;
             effect.TextureEnabled = false;
 
+            GraphicsDevice.RasterizerState = wireframeState;
+
+            DrawBspTree(union);
+
+            base.Draw(gameTime);
+        }
+
+        private void DrawBspTree(BSP tree)
+        {
             List<VertexPositionColor> vertices = new List<VertexPositionColor>();
             List<int> indices = new List<int>();
-            bspTree.ToMesh<VertexPositionColor, int>(
+            tree.ToMesh<VertexPositionColor, int>(
                 (p, n) => new VertexPositionColor(p, Color.Black),
-                v => { vertices.Add(v); return vertices.Count - 1;},
+                v => { vertices.Add(v); return vertices.Count - 1; },
                 (a, b, c) =>
-                    {
-                        indices.Add(a);
-                        indices.Add(b);
-                        indices.Add(c);
-                    }
+                {
+                    indices.Add(a);
+                    indices.Add(b);
+                    indices.Add(c);
+                }
             );
 
             DrawShape<VertexPositionColor>(effect, vertices.ToArray(), indices.ToArray());
-
-            base.Draw(gameTime);
         }
 
         private void DrawShape<V>(Effect e, V[] vertices, int[] indices) where V : struct, IVertexType

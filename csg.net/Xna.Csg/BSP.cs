@@ -11,8 +11,8 @@ namespace Xna.Csg
         Node root;
 
         public BSP()
+            :this(new Node())
         {
-            root = new Node();
         }
 
         public BSP(IEnumerable<Polygon> polygons)
@@ -21,9 +21,14 @@ namespace Xna.Csg
             root.Build(polygons);
         }
 
+        private BSP(Node root)
+        {
+            this.root = root;
+        }
+
         public BSP Clone()
         {
-            throw new NotImplementedException();
+            return new BSP(root.Clone());
         }
 
         public IEnumerable<Polygon> ToPolygons()
@@ -122,7 +127,7 @@ namespace Xna.Csg
             private Node front;
             private Node back;
 
-            private IList<Polygon> polygons = new List<Polygon>();
+            private List<Polygon> polygons = new List<Polygon>();
 
             public IEnumerable<Polygon> AllPolygons
             {
@@ -163,18 +168,18 @@ namespace Xna.Csg
 
             public IEnumerable<Polygon> ClipPolygons(IList<Polygon> polygons)
             {
-                List<Polygon> frontPolys = new List<Polygon>();
-                List<Polygon> backPolys = new List<Polygon>();
+                List<Polygon> front = new List<Polygon>();
+                List<Polygon> back = new List<Polygon>();
 
                 for (int i = 0; i < polygons.Count; i++)
-                    splitPlane.Value.SplitPolygon(polygons[i], frontPolys, backPolys, frontPolys, backPolys);
+                    splitPlane.Value.SplitPolygon(polygons[i], front, back, front, back);
 
-                if (front != null)
-                    frontPolys = front.ClipPolygons(frontPolys).ToList();
-                if (back != null)
-                    backPolys = back.ClipPolygons(backPolys).ToList();
+                if (this.front != null)
+                    front = this.front.ClipPolygons(front).ToList();
+                if (this.back != null)
+                    back = this.back.ClipPolygons(back).ToList();
 
-                return frontPolys.Concat(backPolys);
+                return front.Concat(back);
             }
 
             public void ClipTo(Node other)
@@ -202,15 +207,35 @@ namespace Xna.Csg
 
                 if (frontPolys.Count > 0)
                 {
-                    front = new Node();
+                    if (front == null)
+                        front = new Node();
                     front.Build(frontPolys);
                 }
 
                 if (backPolys.Count > 0)
                 {
-                    back = new Node();
+                    if (back == null)
+                        back = new Node();
                     back.Build(backPolys);
                 }
+            }
+
+            public Node Clone()
+            {
+                Node n = new Node();
+
+                if (splitPlane.HasValue)
+                    n.splitPlane = splitPlane.Value;
+
+                if (front != null)
+                    n.front = front.Clone();
+
+                if (back != null)
+                    n.back = back.Clone();
+
+                n.polygons.AddRange(polygons.Select(a => a.Clone()));
+
+                return n;
             }
         }
     }

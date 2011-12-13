@@ -17,9 +17,9 @@ namespace Xna.Csg
 
             for (int i = 0; i < polygon.Vertices.Length; i++)
             {
-                var t = Vector3.Dot(plane.Normal, polygon.Vertices[i].Position) - plane.D;
+                var t = Vector3.Dot(plane.Normal, polygon.Vertices[i].Position) + plane.D;
 
-                var type = (t < EPSILON) ? PolygonType.Back : (t > EPSILON) ? PolygonType.Front : PolygonType.Coplanar;
+                var type = (t < -EPSILON) ? PolygonType.Back : (t > EPSILON) ? PolygonType.Front : PolygonType.Coplanar;
                 polygonType |= type;
                 types.Add(type);
             }
@@ -57,7 +57,7 @@ namespace Xna.Csg
 
                         if ((ti | tj) == PolygonType.Spanning)
                         {
-                            var t = (plane.D - Vector3.Dot(plane.Normal, vi.Position)) / Vector3.Dot(plane.Normal, vj.Position - vi.Position);
+                            var t = (-plane.D - Vector3.Dot(plane.Normal, vi.Position)) / Vector3.Dot(plane.Normal, vj.Position - vi.Position);
                             var v = vi.Interpolate(vj, t);
                             f.Add(v);
                             b.Add(v);
