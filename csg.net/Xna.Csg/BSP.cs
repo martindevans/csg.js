@@ -53,9 +53,9 @@ namespace Xna.Csg
             return b;
         }
 
-        public static BSP Union(BSP aInput, BSP bInput)
+        public BSP Union(BSP bInput)
         {
-            var a = aInput.root.Clone();
+            var a = this.root.Clone();
             var b = bInput.root.Clone();
 
             a.ClipTo(b);
@@ -68,9 +68,9 @@ namespace Xna.Csg
             return new BSP(a.AllPolygons);
         }
 
-        public static BSP Subtract(BSP aInput, BSP bInput)
+        public BSP Subtract(BSP bInput)
         {
-            var a = aInput.root.Clone();
+            var a = this.root.Clone();
             var b = bInput.root.Clone();
 
             a.Invert();
@@ -85,9 +85,9 @@ namespace Xna.Csg
             return new BSP(a.AllPolygons);
         }
 
-        public static BSP Intersect(BSP aInput, BSP bInput)
+        public BSP Intersect(BSP bInput)
         {
-            var a = aInput.root.Clone();
+            var a = this.root.Clone();
             var b = bInput.root.Clone();
 
             a.Invert();

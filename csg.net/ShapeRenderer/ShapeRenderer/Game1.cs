@@ -44,9 +44,9 @@ namespace ShapeRenderer
         protected override void Initialize()
         {
             var a = new Cube();
-            var b = new Icosahedron().Transform(Matrix.CreateScale(0.7f));
+            var b = new Sphere(2).Transform(Matrix.CreateScale(0.7f));
 
-            result = BSP.Intersect(a, b);
+            result = a.Union(b);
 
             base.Initialize();
         }

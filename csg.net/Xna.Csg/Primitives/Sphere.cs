@@ -6,11 +6,11 @@ using Microsoft.Xna.Framework;
 
 namespace Xna.Csg.Primitives
 {
-    public class Icosahedron
+    public class Sphere
         :BSP
     {
-        public Icosahedron()
-            :base(CreatePolygons())
+        public Sphere(int subdivisions = 0)
+            :base(Subdivide(CreatePolygons(), subdivisions))
         {
         }
 
@@ -55,6 +55,36 @@ namespace Xna.Csg.Primitives
             var vertices = icosahedronVertices.Select(a => new Vertex(a, a)).ToArray();
 
             return icosahedronIndices.Select(a => new Polygon(a.Select(i => vertices[i])));
+        }
+
+        private static IEnumerable<Polygon> Subdivide(IEnumerable<Polygon> polygons, int subdivisions)
+        {
+            for (int i = 0; i < subdivisions; i++)
+            {
+                polygons = Subdivide(polygons).ToArray();
+            }
+
+            return polygons;
+        }
+
+        private static IEnumerable<Polygon> Subdivide(IEnumerable<Polygon> polygons)
+        {
+            foreach (var polygon in polygons)
+            {
+                Vector3 abMidPosition = Vector3.Normalize((polygon.Vertices[0].Position + polygon.Vertices[1].Position) / 2f);
+                Vertex abMid = new Vertex(abMidPosition, abMidPosition);
+
+                Vector3 bcMidPosition = Vector3.Normalize((polygon.Vertices[1].Position + polygon.Vertices[2].Position) / 2f);
+                Vertex bcMid = new Vertex(bcMidPosition, bcMidPosition);
+
+                Vector3 caMidPosition = Vector3.Normalize((polygon.Vertices[2].Position + polygon.Vertices[0].Position) / 2f);
+                Vertex caMid = new Vertex(caMidPosition, caMidPosition);
+
+                yield return new Polygon(polygon.Vertices[0], abMid, caMid);
+                yield return new Polygon(abMid, polygon.Vertices[1], bcMid);
+                yield return new Polygon(bcMid, polygon.Vertices[2], caMid);
+                yield return new Polygon(abMid, bcMid, caMid);
+            }
         }
     }
 }
