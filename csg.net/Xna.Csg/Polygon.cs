@@ -34,6 +34,14 @@ namespace Xna.Csg
             Plane = new Plane(vertices.First().Position, vertices.Skip(1).First().Position, vertices.Skip(2).First().Position);
         }
 
+        public void CalculateVertexNormals()
+        {
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                Vertices[i].Normal = Plane.Normal;
+            }
+        }
+
         public Polygon Flip()
         {
             return new Polygon(Vertices.Select(a => a.Flip()).Reverse());

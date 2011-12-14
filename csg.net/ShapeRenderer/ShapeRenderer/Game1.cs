@@ -43,8 +43,8 @@ namespace ShapeRenderer
         /// </summary>
         protected override void Initialize()
         {
-            var a = new Cube();
-            var b = new Sphere(2).Transform(Matrix.CreateScale(0.7f));
+            var a = new Cylinder(6);
+            var b = new Sphere(2).Transform(Matrix.CreateScale(0.75f));
 
             result = a.Union(b);
 
@@ -95,7 +95,7 @@ namespace ShapeRenderer
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            effect.World = Matrix.CreateScale(30) * Matrix.CreateRotationY(rotation.X) * Matrix.CreateRotationZ(rotation.Y);
+            effect.World = Matrix.CreateScale(25) * Matrix.CreateRotationY(rotation.X) * Matrix.CreateRotationZ(rotation.Y);
             effect.View = Matrix.CreateLookAt(new Vector3(25, 20, 10), Vector3.Zero, Vector3.Up);
             effect.Projection = Matrix.CreatePerspectiveFieldOfView(2, GraphicsDevice.Viewport.AspectRatio, 1, 1000);
             effect.VertexColorEnabled = true;
@@ -113,7 +113,7 @@ namespace ShapeRenderer
             List<VertexPositionColor> vertices = new List<VertexPositionColor>();
             List<int> indices = new List<int>();
             tree.ToMesh<VertexPositionColor, int>(
-                (p, n) => new VertexPositionColor(p, Color.Black),
+                (p, n) => new VertexPositionColor(p, Color.Green),
                 v => { vertices.Add(v); return vertices.Count - 1; },
                 (a, b, c) =>
                 {
