@@ -36,11 +36,21 @@ namespace Xna.Csg
             return root.AllPolygons;
         }
 
-        public BSP Inverse()
+        public BSP Transform(Matrix transformation)
         {
-            var bsp = Clone();
-            bsp.root.Invert();
-            return bsp;
+            BSP b = new BSP(
+                root
+                .AllPolygons
+                .Select(a =>
+                    new Polygon(
+                        a.Vertices.Select(v =>
+                            new Vertex(Vector3.Transform(v.Position, transformation), Vector3.TransformNormal(v.Normal, transformation))
+                        )
+                    )
+                )
+            );
+
+            return b;
         }
 
         public static BSP Union(BSP aInput, BSP bInput)
@@ -89,35 +99,6 @@ namespace Xna.Csg
             a.Invert();
 
             return new BSP(a.AllPolygons);
-        }
-
-        public static BSP Cube(Vector3 center, float radius)
-        {
-            KeyValuePair<int[], Vector3>[] info = new KeyValuePair<int[],Vector3>[]
-            {
-                new KeyValuePair<int[], Vector3>(new int[] { 0, 4, 6, 2 }, new Vector3(-1, 0, 0)),
-                new KeyValuePair<int[], Vector3>(new int[] { 1, 3, 7, 5 }, new Vector3(+1, 0, 0)),
-                new KeyValuePair<int[], Vector3>(new int[] { 0, 1, 5, 4 }, new Vector3(0, -1, 0)),
-                new KeyValuePair<int[], Vector3>(new int[] { 2, 6, 7, 3 }, new Vector3(0, +1, 0)),
-                new KeyValuePair<int[], Vector3>(new int[] { 0, 2, 3, 1 }, new Vector3(0, 0, -1)),
-                new KeyValuePair<int[], Vector3>(new int[] { 4, 5, 7, 6 }, new Vector3(0, 0, +1))
-            };
-
-            var data = info.Select(i =>
-            {
-                return new Polygon(i.Key.Select(x =>
-                {
-                    var pos = new Vector3(
-                        center.X + radius * (2 * ((x & 1) > 0 ? 1 : 0) - 1),
-                        center.Y + radius * (2 * ((x & 2) > 0 ? 1 : 0) - 1),
-                        center.Z + radius * (2 * ((x & 4) > 0 ? 1 : 0) - 1)
-                    );
-
-                    return new Vertex(pos, i.Value);
-                }));
-            });
-
-            return new BSP(data);
         }
 
         private class Node

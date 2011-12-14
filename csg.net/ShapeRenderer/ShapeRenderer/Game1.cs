@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Xna.Csg;
+using Xna.Csg.Primitives;
 
 namespace ShapeRenderer
 {
@@ -22,12 +23,7 @@ namespace ShapeRenderer
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        BSP bspTreeA;
-        BSP bspTreeB;
-
-        BSP union;
-        BSP intersection;
-        BSP subtract;
+        BSP result;
 
         Vector2 rotation;
         BasicEffect effect;
@@ -47,12 +43,10 @@ namespace ShapeRenderer
         /// </summary>
         protected override void Initialize()
         {
-            bspTreeA = BSP.Cube(new Vector3(0, 0, 0), 4);
-            bspTreeB = BSP.Cube(new Vector3(4, 4, 4), 4);
+            var a = new Cube();
+            var b = new Icosahedron().Transform(Matrix.CreateScale(0.7f));
 
-            union = BSP.Union(bspTreeA, bspTreeB);
-            intersection = BSP.Intersect(bspTreeA, bspTreeB);
-            subtract = BSP.Subtract(bspTreeA, bspTreeB);
+            result = BSP.Intersect(a, b);
 
             base.Initialize();
         }
@@ -101,7 +95,7 @@ namespace ShapeRenderer
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            effect.World = Matrix.CreateScale(2) * Matrix.CreateRotationY(rotation.X) * Matrix.CreateRotationZ(rotation.Y);
+            effect.World = Matrix.CreateScale(30) * Matrix.CreateRotationY(rotation.X) * Matrix.CreateRotationZ(rotation.Y);
             effect.View = Matrix.CreateLookAt(new Vector3(25, 20, 10), Vector3.Zero, Vector3.Up);
             effect.Projection = Matrix.CreatePerspectiveFieldOfView(2, GraphicsDevice.Viewport.AspectRatio, 1, 1000);
             effect.VertexColorEnabled = true;
@@ -109,7 +103,7 @@ namespace ShapeRenderer
 
             GraphicsDevice.RasterizerState = wireframeState;
 
-            DrawBspTree(union);
+            DrawBspTree(result);
 
             base.Draw(gameTime);
         }
