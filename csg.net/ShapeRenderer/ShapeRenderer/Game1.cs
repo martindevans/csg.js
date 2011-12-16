@@ -43,10 +43,17 @@ namespace ShapeRenderer
         /// </summary>
         protected override void Initialize()
         {
-            var a = new Cylinder(6);
-            var b = new Sphere(2).Transform(Matrix.CreateScale(0.75f));
+            var a = new Cylinder(10).Transform(Matrix.CreateScale(0.5f, 2, 0.5f));
+            var b = new Cylinder(10).Transform(Matrix.CreateScale(0.5f, 2, 0.5f) * Matrix.CreateRotationX(MathHelper.PiOver2));
+            var c = new Cylinder(10).Transform(Matrix.CreateScale(0.5f, 2, 0.5f) * Matrix.CreateRotationZ(MathHelper.PiOver2));
 
-            result = a.Union(b);
+            var d = new Cube().Transform(Matrix.CreateScale(1.5f));
+            var e = new Sphere(3);
+
+            var abc = a.Union(b).Union(c);
+            var de = d.Intersect(e);
+
+            result = de.Subtract(abc);
 
             base.Initialize();
         }

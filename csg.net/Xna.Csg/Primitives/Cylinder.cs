@@ -26,23 +26,26 @@ namespace Xna.Csg.Primitives
             }
 
             //top circle
-            var top = new Polygon(positions.Reverse().Select(a => new Vector3(a, 0.5f)).Select(a => new Vertex(a, Vector3.Zero)));
+            var top = new Polygon(positions.Select(a => new Vector3(a.X, 0.5f, a.Y)).Select(a => new Vertex(a, Vector3.Zero)));
             top.CalculateVertexNormals();
             yield return top;
 
             //bottom circle
-            var bottom = new Polygon(positions.Select(a => new Vector3(a, -0.5f)).Select(a => new Vertex(a, Vector3.Zero)));
+            var bottom = new Polygon(positions.Reverse().Select(a => new Vector3(a.X, -0.5f, a.Y)).Select(a => new Vertex(a, Vector3.Zero)));
             bottom.CalculateVertexNormals();
             yield return bottom;
 
             //sides
             for (int i = 0; i < rotations; i++)
             {
-                var poly = new Polygon(new Vertex[] {                  
-                    new Vertex(new Vector3(positions[(i + 1) % rotations], 0.5f), Vector3.Zero),
-                    new Vertex(new Vector3(positions[(i + 1) % rotations], -0.5f), Vector3.Zero),
-                    new Vertex(new Vector3(positions[i], -0.5f), Vector3.Zero),
-                    new Vertex(new Vector3(positions[i], 0.5f), Vector3.Zero)
+                Vector2 pos1 = positions[(i + 1) % rotations];
+                Vector2 pos2 = positions[i];
+
+                var poly = new Polygon(new Vertex[] {                                  
+                    new Vertex(new Vector3(pos2.X, 0.5f, pos2.Y), Vector3.Zero),
+                    new Vertex(new Vector3(pos2.X, -0.5f, pos2.Y), Vector3.Zero),
+                    new Vertex(new Vector3(pos1.X, -0.5f, pos1.Y), Vector3.Zero),
+                    new Vertex(new Vector3(pos1.X, 0.5f, pos1.Y), Vector3.Zero),
                 });
                 poly.CalculateVertexNormals();
 
