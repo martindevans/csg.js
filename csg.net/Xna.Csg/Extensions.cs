@@ -71,7 +71,7 @@ namespace Xna.Csg
             }
         }
 
-        public static void ToMesh<V, I>(this BSP tree, Func<Vector3, Vector3, V> positionNormalToVertex, Func<V, I> insertVertex, Action<I, I, I> createTriangle)
+        public static void ToTriangleList<V, I>(this BSP tree, Func<Vector3, Vector3, V> positionNormalToVertex, Func<V, I> insertVertex, Action<I, I, I> createTriangle)
         {
             foreach (var polygon in tree.ToPolygons())
             {
@@ -81,6 +81,19 @@ namespace Xna.Csg
                 {
                     createTriangle(indices[0], indices[i - 1], indices[i]);
                 }
+            }
+        }
+
+        public static void ToListLine<V, I>(this BSP tree, Func<Vector3, Vector3, V> positionNormalToVertex, Func<V, I> insertVertex, Action<I, I> createLine)
+        {
+            foreach (var polygon in tree.ToPolygons())
+            {
+                var indices = polygon.Vertices.Select(a => positionNormalToVertex(a.Position, a.Normal)).Select(a => insertVertex(a)).ToArray();
+
+                for (int i = 0; i < indices.Length; i++)
+			    {
+			        createLine(indices[i], indices[(i + 1) % indices.Length]);
+			    }
             }
         }
     }

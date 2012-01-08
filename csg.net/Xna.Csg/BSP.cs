@@ -8,6 +8,8 @@ namespace Xna.Csg
 {
     public class BSP
     {
+        public event Action OnChange;
+
         Node root;
 
         public BSP()
@@ -50,44 +52,52 @@ namespace Xna.Csg
                 )
             );
 
+            InvokeChange();
+
             return b;
         }
 
-        public BSP Union(BSP bInput)
+        private void InvokeChange()
         {
-            var a = this.root.Clone();
-            var b = bInput.root.Clone();
-
-            a.ClipTo(b);
-            b.ClipTo(a);
-            b.Invert();
-            b.ClipTo(a);
-            b.Invert();
-            a.Build(b.AllPolygons);
-
-            return new BSP(a.AllPolygons);
+            if (OnChange != null)
+                OnChange();
         }
 
-        public BSP Subtract(BSP bInput)
+        public void Union(BSP bInput)
         {
-            var a = this.root.Clone();
+            var a = this.root;
             var b = bInput.root.Clone();
 
-            a.Invert();
             a.ClipTo(b);
             b.ClipTo(a);
             b.Invert();
             b.ClipTo(a);
             b.Invert();
             a.Build(b.AllPolygons);
-            a.Invert();
 
-            return new BSP(a.AllPolygons);
+            InvokeChange();
         }
 
-        public BSP Intersect(BSP bInput)
+        public void Subtract(BSP bInput)
         {
-            var a = this.root.Clone();
+            var a = this.root;
+            var b = bInput.root.Clone();
+
+            a.Invert();
+            a.ClipTo(b);
+            b.ClipTo(a);
+            b.Invert();
+            b.ClipTo(a);
+            b.Invert();
+            a.Build(b.AllPolygons);
+            a.Invert();
+
+            InvokeChange();
+        }
+
+        public void Intersect(BSP bInput)
+        {
+            var a = this.root;
             var b = bInput.root.Clone();
 
             a.Invert();
@@ -98,7 +108,14 @@ namespace Xna.Csg
             a.Build(b.AllPolygons);
             a.Invert();
 
-            return new BSP(a.AllPolygons);
+            InvokeChange();
+        }
+
+        public void Clear()
+        {
+            root = new Node();
+
+            InvokeChange();
         }
 
         private class Node
@@ -181,7 +198,12 @@ namespace Xna.Csg
             public void Build(IEnumerable<Polygon> polygons)
             {
                 if (!splitPlane.HasValue)
-                    splitPlane = polygons.First().Plane;
+                {
+                    if (polygons.FirstOrDefault() == null)
+                        return;
+                    else
+                        splitPlane = polygons.First().Plane;
+                }
 
                 List<Polygon> frontPolys = new List<Polygon>();
                 List<Polygon> backPolys = new List<Polygon>();
