@@ -14,7 +14,7 @@ namespace Xna.Csg
         public Vertex(Vector3 position, Vector3 normal)
         {
             Position = position;
-            Normal = normal;
+            Normal = Vector3.Normalize(normal);
         }
 
         public Vertex Flip()
@@ -25,6 +25,11 @@ namespace Xna.Csg
         public Vertex Interpolate(Vertex other, float t)
         {
             return new Vertex(Vector3.Lerp(Position, other.Position, t), Vector3.Lerp(Normal, other.Normal, t));
+        }
+
+        public override string ToString()
+        {
+            return Position + ", N=" + Normal;
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Xna.Csg.Primitives
         static int[][] icosahedronIndices = new int[][] {
                 new[] { 0, 6, 1 },
                 new[] { 0, 11, 6},
-                new[] {  1, 4, 0},
+                new[] { 1, 4, 0},
                 new[] { 1, 8, 4},
                 new[] { 1, 10, 8},
                 new[] { 2, 5, 3},
