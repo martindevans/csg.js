@@ -17,7 +17,7 @@ namespace Xna.Csg
 
             for (int i = 0; i < polygon.Vertices.Length; i++)
             {
-                var t = Vector3.Dot(plane.Normal, polygon.Vertices[i].Position) + plane.D;
+                var t = polygon.Vertices[i].Position.Distance(plane);
 
                 var type = (t < -EPSILON) ? PolygonType.Back : (t > EPSILON) ? PolygonType.Front : PolygonType.Coplanar;
                 polygonType |= type;
@@ -122,6 +122,18 @@ namespace Xna.Csg
             }
 
             return true;
+        }
+
+        public static float? Intersects(this Ray ray, BSP bsp)
+        {
+            return bsp.RayCast(ray);
+        }
+
+        public static float Distance(this Vector3 point, Plane plane)
+        {
+            float dot = Vector3.Dot(plane.Normal, point);
+            float value = dot + plane.D;
+            return value;
         }
     }
 }

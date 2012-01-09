@@ -5,9 +5,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xna.Csg", "Xna.Csg\Xna.Csg.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShapeRenderer", "ShapeRenderer\ShapeRenderer\ShapeRenderer.csproj", "{A0F3672F-5169-4148-9464-6D9720274D51}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "ShapeRendererContent", "ShapeRenderer\ShapeRendererContent\ShapeRendererContent.contentproj", "{2B46A81A-C1FF-45E9-8F21-3E2B23B2D5CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShapeRendererContent", "ShapeRenderer\ShapeRendererContent\ShapeRendererContent.contentproj", "{2B46A81A-C1FF-45E9-8F21-3E2B23B2D5CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsgTests", "CsgTests\CsgTests.csproj", "{903F5619-D5C7-475C-8BCF-56BBC095FA2D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{18FCCF20-35DA-42B0-8274-9B64145DBF15}"
+	ProjectSection(SolutionItems) = preProject
+		csg.net.vsmdi = csg.net.vsmdi
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
 EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = csg.net.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -43,6 +55,16 @@ Global
 		{2B46A81A-C1FF-45E9-8F21-3E2B23B2D5CA}.Release|Any CPU.ActiveCfg = Release|x86
 		{2B46A81A-C1FF-45E9-8F21-3E2B23B2D5CA}.Release|Mixed Platforms.ActiveCfg = Release|x86
 		{2B46A81A-C1FF-45E9-8F21-3E2B23B2D5CA}.Release|x86.ActiveCfg = Release|x86
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{903F5619-D5C7-475C-8BCF-56BBC095FA2D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

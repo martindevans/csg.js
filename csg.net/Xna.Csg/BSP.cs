@@ -12,6 +12,7 @@ namespace Xna.Csg
 
         Node root;
 
+        #region constructors
         public BSP()
             :this(new Node())
         {
@@ -32,6 +33,7 @@ namespace Xna.Csg
         {
             return new BSP(root.Clone());
         }
+        #endregion
 
         public IEnumerable<Polygon> ToPolygons()
         {
@@ -63,6 +65,7 @@ namespace Xna.Csg
                 OnChange();
         }
 
+        #region mutation
         public void Union(BSP bInput)
         {
             var a = this.root;
@@ -117,9 +120,16 @@ namespace Xna.Csg
 
             InvokeChange();
         }
+        #endregion
+
+        public float? RayCast(Ray ray)
+        {
+            return root.RayCast(ray);
+        }
 
         private class Node
         {
+            #region fields and properties
             private Plane? splitPlane;
 
             private Node front;
@@ -142,7 +152,9 @@ namespace Xna.Csg
                             yield return p;
                 }
             }
+            #endregion
 
+            #region mutation
             public void Invert()
             {
                 //flip polygons
@@ -245,6 +257,118 @@ namespace Xna.Csg
 
                 return n;
             }
+            #endregion
+
+            #region query
+            private float? RayCastNode(Node n, Ray r)
+            {
+                if (n == null)
+                    return null;
+
+                return n.RayCast(r);
+            }
+
+            private bool RayCastItems(List<Polygon> polygons, Vector3 planeIntersectionPoint)
+            {
+                //project plane into 2D with a topology preserving mapping onto 2 axes
+                Func<Vector3, Vector2> vectorReducer;
+                Vector3 normal = new Vector3(Math.Abs(splitPlane.Value.Normal.X), Math.Abs(splitPlane.Value.Normal.Y), Math.Abs(splitPlane.Value.Normal.Z));
+                if (normal.X > normal.Y && normal.X > normal.Z)
+                    vectorReducer = a => new Vector2(a.Y, a.Z);
+                else if (normal.Y > normal.X && normal.Y > normal.Z)
+                    vectorReducer = a => new Vector2(a.X, a.Z);
+                else
+                    vectorReducer = a => new Vector2(a.X, a.Y);
+
+                foreach (var poly in polygons)
+                {
+                    bool inside = true;
+                    for (int i = 0; i < poly.Vertices.Length; i++)
+                    {
+                        var start = vectorReducer(poly.Vertices[i].Position - planeIntersectionPoint);
+                        var end = vectorReducer(poly.Vertices[(i + 1) % poly.Vertices.Length].Position - planeIntersectionPoint);
+
+                        var side = end - start;
+
+                        if (Vector2.Dot(side, -start) <= 0)
+                        {
+                            inside = false;
+                            break;
+                        }
+                    }
+
+                    if (inside)
+                        return true;
+                }
+
+                return false;
+            }
+
+            public float? RayCast(Ray r)
+            {
+                if (!splitPlane.HasValue)
+                    return null;
+
+                float distance = r.Position.Distance(splitPlane.Value);
+                Vector3 planeIntersectionPoint = r.Position + r.Direction * distance;
+
+                if (distance < -Extensions.EPSILON)
+                {
+                    var b = RayCastNode(back, r);
+                    if (b.HasValue)
+                        return b;
+
+                    if (RayCastItems(polygons, planeIntersectionPoint))
+                        return distance;
+
+                    if (Vector3.Dot(r.Direction, splitPlane.Value.Normal) > 0)
+                    {
+                        var f = RayCastNode(front, new Ray(r.Position + r.Direction * distance, r.Direction));
+                        if (f.HasValue)
+                            return f;
+                    }
+                }
+                else if (distance > Extensions.EPSILON)
+                {
+                    var f = RayCastNode(front, new Ray(r.Position + r.Direction * distance, r.Direction));
+                    if (f.HasValue)
+                        return f;
+
+                    if (RayCastItems(polygons, planeIntersectionPoint))
+                        return distance;
+
+                    if (Vector3.Dot(r.Direction, splitPlane.Value.Normal) < 0)
+                    {
+                        var b = RayCastNode(back, r);
+                        if (b.HasValue)
+                            return b;
+                    }
+                }
+                else
+                {
+                    if (RayCastItems(polygons, planeIntersectionPoint))
+                        return distance;
+
+                    float dot = Vector3.Dot(r.Direction, splitPlane.Value.Normal);
+                    if (dot == 0)
+                        return null;
+                    if (dot > 0)
+                    {
+                        var f = RayCastNode(front, new Ray(planeIntersectionPoint, r.Direction));
+                        if (f.HasValue)
+                            return f;
+                    }
+                    else
+                    {
+                        var b = RayCastNode(back, r);
+                        if (b.HasValue)
+                            return b;
+                    }
+                }
+
+                return null;
+            }
+            #endregion
         }
     }
 }

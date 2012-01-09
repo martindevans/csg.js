@@ -121,8 +121,9 @@
       <Name>Xna.Csg</Name>
     </ProjectReference>
     <ProjectReference Include="..\ShapeRendererContent\ShapeRendererContent.contentproj">
-      <Name>ShapeRendererContent</Name>
+      <Name>ShapeRendererContent %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>
+      <Project>{2B46A81A-C1FF-45E9-8F21-3E2B23B2D5CA}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

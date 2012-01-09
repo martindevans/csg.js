@@ -28,6 +28,12 @@ namespace ShapeRenderer
         Vector2 rotation;
         BasicEffect effect;
         RasterizerState wireframeState;
+        Matrix projection;
+        Matrix view;
+
+        BSP sphere;
+
+        Vector3? mouseIntersectionPosition;
 
         public Game1()
         {
@@ -43,17 +49,29 @@ namespace ShapeRenderer
         /// </summary>
         protected override void Initialize()
         {
-            var a = new Cylinder(10).Transform(Matrix.CreateScale(0.5f, 2, 0.5f));
-            var b = new Cylinder(10).Transform(Matrix.CreateScale(0.5f, 2, 0.5f) * Matrix.CreateRotationX(MathHelper.PiOver2));
-            var c = new Cylinder(10).Transform(Matrix.CreateScale(0.5f, 2, 0.5f) * Matrix.CreateRotationZ(MathHelper.PiOver2));
+            IsMouseVisible = true;
 
-            var d = new Cube().Transform(Matrix.CreateScale(1.5f));
-            var e = new Sphere(3);
+            float scale = 2;
 
-            var abc = a.Union(b).Union(c);
-            var de = d.Intersect(e);
+            var a = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale));
+            var b = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationX(MathHelper.PiOver2));
+            var c = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationZ(MathHelper.PiOver2));
 
-            result = de.Subtract(abc);
+            var d = new Cube().Transform(Matrix.CreateScale(15f * scale));
+            var e = new Sphere(3).Transform(Matrix.CreateScale(10 * scale));
+
+            //var abc = a.Clone();
+            //abc.Union(b);
+            //abc.Union(c);
+
+            //var de = d.Clone();
+            //de.Intersect(e);
+
+            //result = de.Clone();
+            //result.Subtract(abc);
+            result = d;
+
+            sphere = new Sphere(2).Transform(Matrix.CreateScale(1f));
 
             base.Initialize();
         }
@@ -67,6 +85,9 @@ namespace ShapeRenderer
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             effect = new BasicEffect(GraphicsDevice);
+
+            view = Matrix.CreateLookAt(new Vector3(25, 20, 10), Vector3.Zero, Vector3.Up);
+            projection = Matrix.CreatePerspectiveFieldOfView(2, GraphicsDevice.Viewport.AspectRatio, 1, 1000);
 
             wireframeState = new RasterizerState()
             {
@@ -91,6 +112,18 @@ namespace ShapeRenderer
             if (Keyboard.GetState().IsKeyDown(Keys.S))
                 rotation.Y -= controlSpeed;
 
+            MouseState m = Mouse.GetState();
+            Vector3 start = GraphicsDevice.Viewport.Unproject(new Vector3(m.X, m.Y, 0), projection, view, Matrix.Identity);
+            Vector3 end = GraphicsDevice.Viewport.Unproject(new Vector3(m.X, m.Y, 1), projection, view, Matrix.Identity);
+            Ray r = new Ray(start, Vector3.Normalize(end - start));
+
+            float? distance = r.Intersects(result);
+            if (!distance.HasValue)
+                mouseIntersectionPosition = null;
+            else
+                mouseIntersectionPosition = r.Position + r.Direction * distance.Value;
+            Window.Title = mouseIntersectionPosition.HasValue.ToString();
+
             base.Update(gameTime);
         }
 
@@ -102,26 +135,41 @@ namespace ShapeRenderer
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            effect.World = Matrix.CreateScale(25) * Matrix.CreateRotationY(rotation.X) * Matrix.CreateRotationZ(rotation.Y);
-            effect.View = Matrix.CreateLookAt(new Vector3(25, 20, 10), Vector3.Zero, Vector3.Up);
-            effect.Projection = Matrix.CreatePerspectiveFieldOfView(2, GraphicsDevice.Viewport.AspectRatio, 1, 1000);
-            effect.VertexColorEnabled = true;
+            effect.View = view;
+            effect.Projection = projection;
+            effect.VertexColorEnabled = false;
             effect.TextureEnabled = false;
 
-            GraphicsDevice.RasterizerState = wireframeState;
+            GraphicsDevice.RasterizerState = new RasterizerState()
+            {
+                CullMode = CullMode.None,
+            };
+            GraphicsDevice.DepthStencilState = new DepthStencilState()
+            {
+                DepthBufferEnable=true,
+                DepthBufferWriteEnable=true,
+            };
 
-            DrawBspTree(result);
+            DrawShape(effect, result, Matrix.Identity, Color.Green);
+
+            if (mouseIntersectionPosition.HasValue)
+                DrawShape(effect, sphere, Matrix.CreateTranslation(mouseIntersectionPosition.Value), Color.Black);
 
             base.Draw(gameTime);
         }
 
-        private void DrawBspTree(BSP tree)
+        private void DrawShape(BasicEffect e, BSP bsp, Matrix transform, Color color)
         {
-            List<VertexPositionColor> vertices = new List<VertexPositionColor>();
+            List<VertexPositionNormalTexture> vertices = new List<VertexPositionNormalTexture>();
             List<int> indices = new List<int>();
-            tree.ToMesh<VertexPositionColor, int>(
-                (p, n) => new VertexPositionColor(p, Color.Green),
-                v => { vertices.Add(v); return vertices.Count - 1; },
+
+            bsp.ToTriangleList<VertexPositionNormalTexture, int>(
+                (p, n) => new VertexPositionNormalTexture(p, n, Vector2.Zero),
+                v =>
+                {
+                    vertices.Add(v);
+                    return vertices.Count - 1;
+                },
                 (a, b, c) =>
                 {
                     indices.Add(a);
@@ -130,11 +178,14 @@ namespace ShapeRenderer
                 }
             );
 
-            DrawShape<VertexPositionColor>(effect, vertices.ToArray(), indices.ToArray());
+            DrawShape<VertexPositionNormalTexture>(effect, vertices.ToArray(), indices.ToArray(), transform);
         }
 
-        private void DrawShape<V>(Effect e, V[] vertices, int[] indices) where V : struct, IVertexType
+        private void DrawShape<V>(BasicEffect e, V[] vertices, int[] indices, Matrix transform) where V : struct, IVertexType
         {
+            e.World = transform;
+            e.EnableDefaultLighting();
+
             foreach (var item in e.Techniques)
             {
                 foreach (var pass in item.Passes)
