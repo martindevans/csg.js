@@ -40,7 +40,7 @@ namespace Xna.Csg
             return root.AllPolygons;
         }
 
-        public BSP Transform(Matrix transformation)
+        public virtual BSP Transform(Matrix transformation)
         {
             BSP b = new BSP(
                 root
@@ -66,7 +66,7 @@ namespace Xna.Csg
         }
 
         #region mutation
-        public void Union(BSP bInput)
+        public virtual void Union(BSP bInput)
         {
             var a = this.root;
             var b = bInput.root.Clone();
@@ -81,7 +81,7 @@ namespace Xna.Csg
             InvokeChange();
         }
 
-        public void Subtract(BSP bInput)
+        public virtual void Subtract(BSP bInput)
         {
             var a = this.root;
             var b = bInput.root.Clone();
@@ -98,7 +98,7 @@ namespace Xna.Csg
             InvokeChange();
         }
 
-        public void Intersect(BSP bInput)
+        public virtual void Intersect(BSP bInput)
         {
             var a = this.root;
             var b = bInput.root.Clone();
@@ -114,7 +114,7 @@ namespace Xna.Csg
             InvokeChange();
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             root = new Node();
 
@@ -122,7 +122,7 @@ namespace Xna.Csg
         }
         #endregion
 
-        public float? RayCast(Ray ray)
+        public virtual float? RayCast(Ray ray)
         {
             return root.RayCast(ray);
         }

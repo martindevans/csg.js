@@ -92,6 +92,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BoundedBsp.cs" />
     <Compile Include="BSP.cs" />
     <Compile Include="Primitives\Cube.cs" />
     <Compile Include="Extensions.cs" />

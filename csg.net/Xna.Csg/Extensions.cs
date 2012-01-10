@@ -135,5 +135,42 @@ namespace Xna.Csg
             float value = dot + plane.D;
             return value;
         }
+
+        public static BoundingBox IncludePoint(this BoundingBox bound, Vector3 point)
+        {
+            bound.Min.X = Math.Min(bound.Min.X, point.X);
+            bound.Min.Y = Math.Min(bound.Min.Y, point.Y);
+            bound.Min.Z = Math.Min(bound.Min.Z, point.Z);
+
+            bound.Max.X = Math.Max(bound.Max.X, point.X);
+            bound.Max.Y = Math.Max(bound.Max.Y, point.Y);
+            bound.Max.Z = Math.Max(bound.Max.Z, point.Z);
+
+            return bound;
+        }
+
+        public static BoundingBox Transform(this BoundingBox bound, Matrix transform)
+        {
+            var points = new Vector3[8]
+            {
+                bound.Min,
+                new Vector3(bound.Min.X, bound.Min.Y, bound.Max.Z),
+                new Vector3(bound.Min.X, bound.Max.Y, bound.Min.Z),
+                new Vector3(bound.Min.X, bound.Max.Y, bound.Max.Z),
+
+                bound.Max,
+                new Vector3(bound.Max.X, bound.Min.Y, bound.Max.Z),
+                new Vector3(bound.Max.X, bound.Min.Y, bound.Min.Z),
+                new Vector3(bound.Max.X, bound.Min.Y, bound.Min.Z)
+            }.Select(a => Vector3.Transform(a, transform));
+
+            BoundingBox b = new BoundingBox(points.First(), points.First());
+            foreach (var point in points.Skip(1))
+            {
+                b = b.IncludePoint(point);
+            }
+
+            return b;
+        }
     }
 }

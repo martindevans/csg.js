@@ -7,10 +7,10 @@ using Microsoft.Xna.Framework;
 namespace Xna.Csg.Primitives
 {
     public class Sphere
-        :BSP
+        :BoundedBsp
     {
         public Sphere(int subdivisions = 0)
-            :base(Subdivide(CreatePolygons(), subdivisions))
+            : base(Subdivide(CreatePolygons(), subdivisions), new BoundingBox(new Vector3(-1f), new Vector3(1f)))
         {
         }
 
