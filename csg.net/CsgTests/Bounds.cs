@@ -15,7 +15,7 @@ namespace CsgTests
         [TestMethod]
         public void ConstructBounds()
         {
-            BoundedBsp a = new Cube();
+            BSP a = new Cube();
 
             Assert.IsTrue(a.Bounds.HasValue);
             Assert.AreEqual(new BoundingBox(new Vector3(-0.5f), new Vector3(0.5f)), a.Bounds.Value);
@@ -24,7 +24,7 @@ namespace CsgTests
         [TestMethod]
         public void TransformBounds()
         {
-            BoundedBsp a = new Cube().Transform(Matrix.CreateTranslation(0.1f, 0, 0)) as BoundedBsp;
+            BSP a = new Cube().Transform(Matrix.CreateTranslation(0.1f, 0, 0));
 
             Assert.IsTrue(a.Bounds.HasValue);
             Assert.AreEqual(new BoundingBox(new Vector3(-0.4f, -0.5f, -0.5f), new Vector3(0.6f, 0.5f, 0.5f)), a.Bounds.Value);
@@ -33,8 +33,8 @@ namespace CsgTests
         [TestMethod]
         public void UnionBounds()
         {
-            BoundedBsp a = new Cube();
-            BoundedBsp b = new Cube().Transform(Matrix.CreateTranslation(0.1f, 0, 0)) as BoundedBsp;
+            BSP a = new Cube();
+            BSP b = new Cube().Transform(Matrix.CreateTranslation(0.1f, 0, 0));
 
             a.Union(b);
 

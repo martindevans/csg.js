@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 namespace Xna.Csg.Primitives
 {
     public class Cylinder
-        :BoundedBsp
+        : BSP
     {
         public Cylinder(int rotations)
             : base(CreatePolygons(rotations + 2), new BoundingBox(new Vector3(-1f), new Vector3(1f)))

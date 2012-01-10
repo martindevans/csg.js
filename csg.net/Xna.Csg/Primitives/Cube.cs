@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 namespace Xna.Csg.Primitives
 {
     public class Cube
-        :BoundedBsp
+        : BSP
     {
         public Cube()
             :base(CreatePolygons(), new BoundingBox(new Vector3(-0.5f), new Vector3(0.5f)))

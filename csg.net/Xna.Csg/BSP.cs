@@ -12,9 +12,15 @@ namespace Xna.Csg
 
         Node root;
 
+        public BoundingBox? Bounds
+        {
+            get;
+            private set;
+        }
+
         #region constructors
         public BSP()
-            :this(new Node())
+            :this(new Node(), null)
         {
         }
 
@@ -22,18 +28,42 @@ namespace Xna.Csg
             :this()
         {
             root.Build(polygons);
+            this.Bounds = MeasureBounds(this);
         }
 
-        private BSP(Node root)
+        public BSP(IEnumerable<Polygon> polygons, BoundingBox bounds)
+            : this()
+        {
+            root.Build(polygons);
+            this.Bounds = bounds;
+        }
+
+        private BSP(Node root, BoundingBox? bounds)
         {
             this.root = root;
+            this.Bounds = bounds;
         }
 
         public BSP Clone()
         {
-            return new BSP(root.Clone());
+            return new BSP(root.Clone(), Bounds);
         }
         #endregion
+
+        private BoundingBox? MeasureBounds(BSP bsp)
+        {
+            BoundingBox? b = null;
+
+            foreach (var position in bsp.ToPolygons().SelectMany(a => a.Vertices).Select(a => a.Position))
+            {
+                if (b.HasValue)
+                    b.Value.IncludePoint(position);
+                else
+                    b = new BoundingBox(position, position);
+            }
+
+            return b;
+        }
 
         public IEnumerable<Polygon> ToPolygons()
         {
@@ -51,7 +81,7 @@ namespace Xna.Csg
                             new Vertex(Vector3.Transform(v.Position, transformation), Vector3.TransformNormal(v.Normal, transformation))
                         )
                     )
-                )
+                ), Bounds.Value.Transform(transformation)
             );
 
             InvokeChange();
@@ -78,6 +108,29 @@ namespace Xna.Csg
             b.Invert();
             a.Build(b.AllPolygons);
 
+            if (Bounds.HasValue)
+            {
+                if (bInput.Bounds.HasValue)
+                {
+                    Bounds = new BoundingBox(
+                        new Vector3(
+                            Math.Min(Bounds.Value.Min.X, bInput.Bounds.Value.Min.X),
+                            Math.Min(Bounds.Value.Min.Y, bInput.Bounds.Value.Min.Y),
+                            Math.Min(Bounds.Value.Min.Z, bInput.Bounds.Value.Min.Z)
+                        ),
+                        new Vector3(
+                            Math.Max(Bounds.Value.Max.X, bInput.Bounds.Value.Max.X),
+                            Math.Max(Bounds.Value.Max.Y, bInput.Bounds.Value.Max.Y),
+                            Math.Max(Bounds.Value.Max.Z, bInput.Bounds.Value.Max.Z)
+                        )
+                    );
+                }
+                else
+                    Bounds = Bounds;
+            }
+            else
+                Bounds = bInput.Bounds;
+
             InvokeChange();
         }
 
@@ -95,6 +148,8 @@ namespace Xna.Csg
             a.Build(b.AllPolygons);
             a.Invert();
 
+            Bounds = MeasureBounds(this);
+
             InvokeChange();
         }
 
@@ -111,12 +166,36 @@ namespace Xna.Csg
             a.Build(b.AllPolygons);
             a.Invert();
 
+            if (Bounds.HasValue)
+            {
+                if (bInput.Bounds.HasValue)
+                {
+                    Bounds = new BoundingBox(
+                        new Vector3(
+                            Math.Max(Bounds.Value.Min.X, bInput.Bounds.Value.Min.X),
+                            Math.Max(Bounds.Value.Min.Y, bInput.Bounds.Value.Min.Y),
+                            Math.Max(Bounds.Value.Min.Z, bInput.Bounds.Value.Min.Z)
+                        ),
+                        new Vector3(
+                            Math.Min(Bounds.Value.Max.X, bInput.Bounds.Value.Max.X),
+                            Math.Min(Bounds.Value.Max.Y, bInput.Bounds.Value.Max.Y),
+                            Math.Min(Bounds.Value.Max.Z, bInput.Bounds.Value.Max.Z)
+                        )
+                    );
+                }
+                else
+                    Bounds = null;
+            }
+            else
+                Bounds = null;
+
             InvokeChange();
         }
 
         public virtual void Clear()
         {
             root = new Node();
+            Bounds = null;
 
             InvokeChange();
         }
@@ -124,7 +203,15 @@ namespace Xna.Csg
 
         public virtual float? RayCast(Ray ray)
         {
-            return root.RayCast(ray);
+            if (Bounds.HasValue)
+            {
+                float? boundsDistance = ray.Intersects(Bounds.Value);
+
+                if (boundsDistance.HasValue)
+                    return root.RayCast(ray);
+            }
+
+            return null;
         }
 
         private class Node
