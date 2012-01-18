@@ -71,9 +71,9 @@ namespace Xna.Csg
             }
         }
 
-        public static void ToTriangleList<V, I>(this BSP tree, Func<Vector3, Vector3, V> positionNormalToVertex, Func<V, I> insertVertex, Action<I, I, I> createTriangle)
+        public static void ToTriangleList<V, I>(this ICsgProvider tree, Func<Vector3, Vector3, V> positionNormalToVertex, Func<V, I> insertVertex, Action<I, I, I> createTriangle)
         {
-            foreach (var polygon in tree.ToPolygons())
+            foreach (var polygon in tree.Polygons)
             {
                 var indices = polygon.Vertices.Select(a => positionNormalToVertex(a.Position, a.Normal)).Select(a => insertVertex(a)).ToArray();
 
@@ -101,9 +101,9 @@ namespace Xna.Csg
             }
         }
 
-        public static void ToListLine<V, I>(this BSP tree, Func<Vector3, Vector3, V> positionNormalToVertex, Func<V, I> insertVertex, Action<I, I> createLine)
+        public static void ToListLine<V, I>(this ICsgProvider tree, Func<Vector3, Vector3, V> positionNormalToVertex, Func<V, I> insertVertex, Action<I, I> createLine)
         {
-            foreach (var polygon in tree.ToPolygons())
+            foreach (var polygon in tree.Polygons)
             {
                 var indices = polygon.Vertices.Select(a => positionNormalToVertex(a.Position, a.Normal)).Select(a => insertVertex(a)).ToArray();
 

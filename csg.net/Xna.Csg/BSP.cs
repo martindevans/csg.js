@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 namespace Xna.Csg
 {
     public class BSP
+        :ICsgProvider
     {
         public event Action OnChange;
 
@@ -54,7 +55,7 @@ namespace Xna.Csg
         {
             BoundingBox? b = null;
 
-            foreach (var position in bsp.ToPolygons().SelectMany(a => a.Vertices).Select(a => a.Position))
+            foreach (var position in bsp.Polygons.SelectMany(a => a.Vertices).Select(a => a.Position))
             {
                 if (b.HasValue)
                     b.Value.IncludePoint(position);
@@ -65,9 +66,12 @@ namespace Xna.Csg
             return b;
         }
 
-        public IEnumerable<Polygon> ToPolygons()
+        public IEnumerable<Polygon> Polygons
         {
-            return root.AllPolygons;
+            get
+            {
+                return root.AllPolygons;
+            }
         }
 
         public virtual BSP Transform(Matrix transformation)
@@ -244,6 +248,9 @@ namespace Xna.Csg
             #region mutation
             public void Invert()
             {
+                if (!splitPlane.HasValue)
+                    return;
+
                 //flip polygons
                 for (int i = 0; i < polygons.Count; i++)
                     polygons[i] = polygons[i].Flip();

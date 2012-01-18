@@ -93,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BSP.cs" />
+    <Compile Include="ICsgProvider.cs" />
     <Compile Include="Primitives\Cube.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Polygon.cs" />
