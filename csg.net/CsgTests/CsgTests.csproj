@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bounds.cs" />
+    <Compile Include="Descriptions.cs" />
     <Compile Include="Raycast.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -10,7 +10,7 @@ namespace Xna.Csg.Primitives
         : BSP
     {
         public Cylinder(int rotations)
-            : base(CreatePolygons(rotations + 2), new BoundingBox(new Vector3(-1f), new Vector3(1f)))
+            : base(CreatePolygons(rotations + 2), new BoundingBox(new Vector3(-1f), new Vector3(1f)), new object[] { "cylinder", rotations })
         {
 
         }

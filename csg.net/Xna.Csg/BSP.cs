@@ -9,47 +9,62 @@ namespace Xna.Csg
     public class BSP
         :ICsgProvider
     {
+        object[] description;
+        public IEnumerable<object> Description
+        {
+            get
+            {
+                return description;
+            }
+        }
+
         public event Action OnChange;
 
         Node root;
-
         public BoundingBox? Bounds
         {
             get;
             private set;
         }
+        public IEnumerable<Polygon> Polygons
+        {
+            get
+            {
+                return root.AllPolygons;
+            }
+        }
 
         #region constructors
         public BSP()
-            :this(new Node(), null)
+            :this(new Node(), null, new object[0])
         {
         }
 
-        public BSP(IEnumerable<Polygon> polygons)
-            :this()
-        {
-            root.Build(polygons);
-            this.Bounds = MeasureBounds(this);
-        }
-
-        public BSP(IEnumerable<Polygon> polygons, BoundingBox bounds)
+        protected BSP(IEnumerable<Polygon> polygons, BoundingBox bounds, object[] description)
             : this()
         {
             root.Build(polygons);
             this.Bounds = bounds;
+            this.description = description;
         }
 
-        private BSP(Node root, BoundingBox? bounds)
+        private BSP(Node root, BoundingBox? bounds, object[] description)
         {
             this.root = root;
             this.Bounds = bounds;
+            this.description = description;
         }
 
         public BSP Clone()
         {
-            return new BSP(root.Clone(), Bounds);
+            return new BSP(root.Clone(), Bounds, description);
         }
         #endregion
+
+        private object[] CreateDescription(string operation, object[] existing, params object[] args)
+        {
+            return new object[] { operation }.Append(existing).Append(args).ToArray();
+        }
 
         private BoundingBox? MeasureBounds(BSP bsp)
         {
@@ -66,14 +81,6 @@ namespace Xna.Csg
             return b;
         }
 
-        public IEnumerable<Polygon> Polygons
-        {
-            get
-            {
-                return root.AllPolygons;
-            }
-        }
-
         public virtual BSP Transform(Matrix transformation)
         {
             BSP b = new BSP(
@@ -85,7 +92,9 @@ namespace Xna.Csg
                             new Vertex(Vector3.Transform(v.Position, transformation), Vector3.TransformNormal(v.Normal, transformation))
                         )
                     )
-                ), Bounds.Value.Transform(transformation)
+                ),
+                Bounds.Value.Transform(transformation),
+                CreateDescription("transform", description, transformation.M11, transformation.M12, transformation.M13, transformation.M14, transformation.M21, transformation.M22, transformation.M23, transformation.M24, transformation.M31, transformation.M32, transformation.M33, transformation.M34, transformation.M41, transformation.M42, transformation.M43, transformation.M44)
             );
 
             InvokeChange();
@@ -135,6 +144,7 @@ namespace Xna.Csg
             else
                 Bounds = bInput.Bounds;
 
+            description = CreateDescription("union", description, bInput.description);
             InvokeChange();
         }
 
@@ -154,6 +164,7 @@ namespace Xna.Csg
 
             Bounds = MeasureBounds(this);
 
+            description = CreateDescription("subtract", description, bInput.description);
             InvokeChange();
         }
 
@@ -193,6 +204,7 @@ namespace Xna.Csg
             else
                 Bounds = null;
 
+            description = CreateDescription("intersect", description, bInput.description);
             InvokeChange();
         }
 
@@ -201,6 +213,7 @@ namespace Xna.Csg
             root = new Node();
             Bounds = null;
 
+            description = new object[0];
             InvokeChange();
         }
         #endregion

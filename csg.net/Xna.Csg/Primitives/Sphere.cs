@@ -10,7 +10,7 @@ namespace Xna.Csg.Primitives
         : BSP
     {
         public Sphere(int subdivisions = 0)
-            : base(Subdivide(CreatePolygons(), subdivisions), new BoundingBox(new Vector3(-1f), new Vector3(1f)))
+            : base(Subdivide(CreatePolygons(), subdivisions), new BoundingBox(new Vector3(-1f), new Vector3(1f)), new object[] { "sphere", subdivisions })
         {
         }
 

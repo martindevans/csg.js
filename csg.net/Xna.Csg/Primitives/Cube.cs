@@ -10,7 +10,7 @@ namespace Xna.Csg.Primitives
         : BSP
     {
         public Cube()
-            :base(CreatePolygons(), new BoundingBox(new Vector3(-0.5f), new Vector3(0.5f)))
+            :base(CreatePolygons(), new BoundingBox(new Vector3(-0.5f), new Vector3(0.5f)), new object[] { "cube" })
         {
         }
 
