@@ -9,7 +9,7 @@ namespace Xna.Csg.Primitives
     public class Sphere
         : BSP
     {
-        public Sphere(int subdivisions = 0)
+        public Sphere(uint subdivisions = 0)
             : base(Subdivide(CreatePolygons(), subdivisions), new BoundingBox(new Vector3(-1f), new Vector3(1f)), new object[] { "sphere", subdivisions })
         {
         }
@@ -57,7 +57,7 @@ namespace Xna.Csg.Primitives
             return icosahedronIndices.Select(a => new Polygon(a.Select(i => vertices[i])));
         }
 
-        private static IEnumerable<Polygon> Subdivide(IEnumerable<Polygon> polygons, int subdivisions)
+        private static IEnumerable<Polygon> Subdivide(IEnumerable<Polygon> polygons, uint subdivisions)
         {
             for (int i = 0; i < subdivisions; i++)
             {

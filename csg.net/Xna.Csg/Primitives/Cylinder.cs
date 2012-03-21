@@ -9,13 +9,13 @@ namespace Xna.Csg.Primitives
     public class Cylinder
         : BSP
     {
-        public Cylinder(int rotations)
+        public Cylinder(uint rotations)
             : base(CreatePolygons(rotations + 2), new BoundingBox(new Vector3(-1f), new Vector3(1f)), new object[] { "cylinder", rotations })
         {
 
         }
 
-        private static IEnumerable<Polygon> CreatePolygons(int rotations)
+        private static IEnumerable<Polygon> CreatePolygons(uint rotations)
         {
             Vector2[] positions = new Vector2[rotations];
 
