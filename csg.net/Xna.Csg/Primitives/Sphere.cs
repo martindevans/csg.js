@@ -69,22 +69,24 @@ namespace Xna.Csg.Primitives
 
         private static IEnumerable<Polygon> Subdivide(IEnumerable<Polygon> polygons)
         {
-            foreach (var polygon in polygons)
-            {
-                Vector3 abMidPosition = Vector3.Normalize((polygon.Vertices[0].Position + polygon.Vertices[1].Position) / 2f);
-                Vertex abMid = new Vertex(abMidPosition, abMidPosition);
+            return polygons.AsParallel().SelectMany(a => Subdivide(a));
+        }
 
-                Vector3 bcMidPosition = Vector3.Normalize((polygon.Vertices[1].Position + polygon.Vertices[2].Position) / 2f);
-                Vertex bcMid = new Vertex(bcMidPosition, bcMidPosition);
+        private static IEnumerable<Polygon> Subdivide(Polygon polygon)
+        {
+            Vector3 abMidPosition = Vector3.Normalize((polygon.Vertices[0].Position + polygon.Vertices[1].Position) / 2f);
+            Vertex abMid = new Vertex(abMidPosition, abMidPosition);
 
-                Vector3 caMidPosition = Vector3.Normalize((polygon.Vertices[2].Position + polygon.Vertices[0].Position) / 2f);
-                Vertex caMid = new Vertex(caMidPosition, caMidPosition);
+            Vector3 bcMidPosition = Vector3.Normalize((polygon.Vertices[1].Position + polygon.Vertices[2].Position) / 2f);
+            Vertex bcMid = new Vertex(bcMidPosition, bcMidPosition);
 
-                yield return new Polygon(polygon.Vertices[0], abMid, caMid);
-                yield return new Polygon(abMid, polygon.Vertices[1], bcMid);
-                yield return new Polygon(bcMid, polygon.Vertices[2], caMid);
-                yield return new Polygon(abMid, bcMid, caMid);
-            }
+            Vector3 caMidPosition = Vector3.Normalize((polygon.Vertices[2].Position + polygon.Vertices[0].Position) / 2f);
+            Vertex caMid = new Vertex(caMidPosition, caMidPosition);
+
+            yield return new Polygon(polygon.Vertices[0], abMid, caMid);
+            yield return new Polygon(abMid, polygon.Vertices[1], bcMid);
+            yield return new Polygon(bcMid, polygon.Vertices[2], caMid);
+            yield return new Polygon(abMid, bcMid, caMid);
         }
     }
 }

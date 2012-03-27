@@ -23,7 +23,7 @@ namespace ShapeRenderer
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        BSP result;
+        BSP shapeToRender;
 
         Vector2 rotation;
         BasicEffect effect;
@@ -51,7 +51,7 @@ namespace ShapeRenderer
         {
             IsMouseVisible = true;
 
-            float scale = 2;
+            float scale = 0.2f;
 
             var a = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale));
             var b = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationX(MathHelper.PiOver2));
@@ -69,7 +69,14 @@ namespace ShapeRenderer
 
             //result = de.Clone();
             //result.Subtract(abc);
-            result = d;
+
+            shapeToRender = new Prism(1, new Vector2[]
+            {
+                new Vector2(-1, -1),
+                new Vector2(1, -1),
+                new Vector2(1, 1),
+                new Vector2(-1, 1),
+            });
 
             sphere = new Sphere(2).Transform(Matrix.CreateScale(1f));
 
@@ -86,7 +93,7 @@ namespace ShapeRenderer
 
             effect = new BasicEffect(GraphicsDevice);
 
-            view = Matrix.CreateLookAt(new Vector3(25, 20, 10), Vector3.Zero, Vector3.Up);
+            view = Matrix.CreateLookAt(new Vector3(2.5f, 2, 1), Vector3.Zero, Vector3.Up);
             projection = Matrix.CreatePerspectiveFieldOfView(2, GraphicsDevice.Viewport.AspectRatio, 1, 1000);
 
             wireframeState = new RasterizerState()
@@ -117,7 +124,7 @@ namespace ShapeRenderer
             Vector3 end = GraphicsDevice.Viewport.Unproject(new Vector3(m.X, m.Y, 1), projection, view, Matrix.Identity);
             Ray r = new Ray(start, Vector3.Normalize(end - start));
 
-            float? distance = r.Intersects(result);
+            float? distance = r.Intersects(shapeToRender);
             if (!distance.HasValue)
                 mouseIntersectionPosition = null;
             else
@@ -150,10 +157,10 @@ namespace ShapeRenderer
                 DepthBufferWriteEnable=true,
             };
 
-            DrawShape(effect, result, Matrix.Identity, Color.Green);
+            DrawShape(effect, shapeToRender, Matrix.CreateRotationY((float)gameTime.TotalGameTime.TotalSeconds / 3), Color.Green);
 
-            if (mouseIntersectionPosition.HasValue)
-                DrawShape(effect, sphere, Matrix.CreateTranslation(mouseIntersectionPosition.Value), Color.Black);
+            //if (mouseIntersectionPosition.HasValue)
+            //    DrawShape(effect, sphere, Matrix.CreateTranslation(mouseIntersectionPosition.Value), Color.Black);
 
             base.Draw(gameTime);
         }

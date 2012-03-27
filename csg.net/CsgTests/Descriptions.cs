@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xna.Csg.Primitives;
 using Xna.Csg;
+using Microsoft.Xna.Framework;
 
 namespace CsgTests
 {
@@ -26,7 +27,8 @@ namespace CsgTests
 
             Assert.AreEqual(2, s.Description.Count());
             Assert.AreEqual("sphere", s.Description.First());
-            Assert.AreEqual(1, s.Description.Skip(1).First());
+            var v = s.Description.Skip(1).First();
+            Assert.AreEqual((uint)1, v);
         }
 
         [TestMethod]
@@ -36,7 +38,30 @@ namespace CsgTests
 
             Assert.AreEqual(2, c.Description.Count());
             Assert.AreEqual("cylinder", c.Description.First());
-            Assert.AreEqual(3, c.Description.Skip(1).First());
+            Assert.AreEqual((uint)3, c.Description.Skip(1).First());
+        }
+
+        [TestMethod]
+        public void PrismDescription()
+        {
+            Prism c = new Prism(3, new Vector2[]
+            {
+                new Vector2(0, 10),
+                new Vector2(3, 2),
+                new Vector2(-1, 17),
+            });
+
+            Assert.AreEqual(9, c.Description.Count());
+            Assert.AreEqual("prism", c.Description.First());
+            Assert.AreEqual((float)3, c.Description.Skip(1).First());
+            Assert.AreEqual((uint)3, c.Description.Skip(2).First());
+
+            Assert.AreEqual((float)0, c.Description.Skip(3).First());
+            Assert.AreEqual((float)10, c.Description.Skip(4).First());
+            Assert.AreEqual((float)3, c.Description.Skip(5).First());
+            Assert.AreEqual((float)2, c.Description.Skip(6).First());
+            Assert.AreEqual((float)-1, c.Description.Skip(7).First());
+            Assert.AreEqual((float)17, c.Description.Skip(8).First());
         }
 
         [TestMethod]
@@ -46,7 +71,7 @@ namespace CsgTests
             BSP cube2 = cube.Clone();
             Assert.IsTrue(cube.Description.Zip(cube2.Description, (a, b) => a.Equals(b)).Aggregate((a, b) => a & b));
 
-            BSP sphere = new Sphere(2);
+            BSP sphere = new Sphere(1);
             Assert.IsFalse(sphere.Description.Zip(cube2.Description, (a, b) => a.Equals(b)).Aggregate((a, b) => a & b));
         }
 
@@ -73,7 +98,7 @@ namespace CsgTests
             Assert.AreEqual("union", desc[0]);
             Assert.AreEqual("cube", desc[1]);
             Assert.AreEqual("cylinder", desc[2]);
-            Assert.AreEqual(3, desc[3]);
+            Assert.AreEqual((uint)3, desc[3]);
         }
 
         [TestMethod]
@@ -90,7 +115,7 @@ namespace CsgTests
             Assert.AreEqual("intersect", desc[0]);
             Assert.AreEqual("cube", desc[1]);
             Assert.AreEqual("cylinder", desc[2]);
-            Assert.AreEqual(3, desc[3]);
+            Assert.AreEqual((uint)3, desc[3]);
         }
 
         [TestMethod]
@@ -107,7 +132,7 @@ namespace CsgTests
             Assert.AreEqual("subtract", desc[0]);
             Assert.AreEqual("cube", desc[1]);
             Assert.AreEqual("cylinder", desc[2]);
-            Assert.AreEqual(3, desc[3]);
+            Assert.AreEqual((uint)3, desc[3]);
         }
     }
 }
