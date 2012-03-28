@@ -49,6 +49,7 @@
     <Compile Include="Bounds.cs" />
     <Compile Include="Descriptions.cs" />
     <Compile Include="PolygonTest.cs" />
+    <Compile Include="PrismTest.cs" />
     <Compile Include="Raycast.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SphereTest.cs" />

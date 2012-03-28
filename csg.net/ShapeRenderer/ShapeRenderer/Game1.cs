@@ -58,28 +58,23 @@ namespace ShapeRenderer
             var c = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationZ(MathHelper.PiOver2));
 
             var d = new Cube().Transform(Matrix.CreateScale(15f * scale));
-            var e = new Sphere(2).Transform(Matrix.CreateScale(8 * scale));
 
             var abc = a.Clone();
             abc.Union(b);
             abc.Union(c);
 
-            var de = d.Clone();
-            de.Union(e);
+            shapeToRender = d.Clone();
+            shapeToRender.Subtract(abc);
 
-            shapeToRender = new Sphere(0).Transform(Matrix.CreateScale(2));
-            //shapeToRender.Subtract(new Cube().Transform(Matrix.CreateScale(3f, 3f, 3f) * Matrix.CreateTranslation(0, 0, 0)));
-
-            //shapeToRender = new Prism(1, new Vector2[]
-            //{
-            //    new Vector2(-1.2f, -1.2f),
-            //    new Vector2(1.2f, -1.2f),
-            //    new Vector2(1.2f, 1.2f),
-            //    new Vector2(-1.2f, 1.2f),
-            //});
-            //shapeToRender.Union(new Cylinder(1));
-
-            sphere = new Sphere(2).Transform(Matrix.CreateScale(1f));
+            shapeToRender.Intersect(new Prism(1, new Vector2[]
+            {
+                new Vector2(-1.2f, -1.2f),
+                new Vector2(1.2f, -1.2f),
+                new Vector2(1.2f, 1.2f),
+                new Vector2(0f, 2f),
+                new Vector2(-1.2f, 1.2f),
+            }));
+            //shapeToRender.Intersect(new Cylinder(1));
 
             base.Initialize();
         }
@@ -100,7 +95,7 @@ namespace ShapeRenderer
             wireframeState = new RasterizerState()
             {
                 FillMode = Microsoft.Xna.Framework.Graphics.FillMode.WireFrame,
-                CullMode = CullMode.CullCounterClockwiseFace,
+                CullMode = CullMode.CullClockwiseFace,
             };
         }
 
@@ -151,7 +146,7 @@ namespace ShapeRenderer
             GraphicsDevice.RasterizerState = wireframeState;
             //new RasterizerState()
             //    {
-            //        CullMode = CullMode.CullCounterClockwiseFace,
+            //        CullMode = CullMode.CullClockwiseFace,
             //    };
             GraphicsDevice.DepthStencilState = new DepthStencilState()
             {

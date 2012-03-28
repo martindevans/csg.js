@@ -45,10 +45,10 @@ namespace CsgTests
         public void PrismDescription()
         {
             Prism c = new Prism(3, new Vector2[]
-            {
-                new Vector2(0, 10),
-                new Vector2(3, 2),
+            {                
                 new Vector2(-1, 17),
+                new Vector2(3, 2),
+                new Vector2(0, 10),
             });
 
             Assert.AreEqual(9, c.Description.Count());
@@ -56,12 +56,12 @@ namespace CsgTests
             Assert.AreEqual((float)3, c.Description.Skip(1).First());
             Assert.AreEqual((uint)3, c.Description.Skip(2).First());
 
-            Assert.AreEqual((float)0, c.Description.Skip(3).First());
-            Assert.AreEqual((float)10, c.Description.Skip(4).First());
+            Assert.AreEqual((float)-1, c.Description.Skip(3).First());
+            Assert.AreEqual((float)17, c.Description.Skip(4).First());
             Assert.AreEqual((float)3, c.Description.Skip(5).First());
             Assert.AreEqual((float)2, c.Description.Skip(6).First());
-            Assert.AreEqual((float)-1, c.Description.Skip(7).First());
-            Assert.AreEqual((float)17, c.Description.Skip(8).First());
+            Assert.AreEqual((float)0, c.Description.Skip(7).First());
+            Assert.AreEqual((float)10, c.Description.Skip(8).First());
         }
 
         [TestMethod]

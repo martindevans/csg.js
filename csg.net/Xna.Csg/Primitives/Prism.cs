@@ -31,6 +31,10 @@ namespace Xna.Csg.Primitives
             //top circle
             var top = new Polygon(points.Select(a => new Vector3(a.X, height / 2, a.Y)).Select(a => new Vertex(a, Vector3.Zero)));
             top.CalculateVertexNormals();
+
+            if (top.Plane.D > 0)
+                throw new ArgumentException("Prism wound wrong way");
+
             yield return top;
 
             //bottom circle
