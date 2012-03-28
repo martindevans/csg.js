@@ -7,11 +7,25 @@ using Microsoft.Xna.Framework;
 namespace Xna.Csg.Primitives
 {
     public class Cube
-        : BSP
+        : Cylinder
     {
         public Cube()
-            :base(CreatePolygons(), new BoundingBox(new Vector3(-0.5f), new Vector3(0.5f)), new object[] { "cube" })
+            :base(2, MathHelper.PiOver2, 0.5f, new object[] { "cube" })
         {
+
+        }
+
+        private static Vector2[] CalculatePoints(uint rotations)
+        {
+            Vector2[] positions = new Vector2[rotations];
+
+            for (int i = 0; i < rotations; i++)
+            {
+                float angle = MathHelper.TwoPi / rotations * i;
+                positions[i] = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
+            }
+
+            return positions;
         }
 
         private static IEnumerable<Polygon> CreatePolygons()

@@ -7,22 +7,28 @@ using Microsoft.Xna.Framework;
 namespace Xna.Csg.Primitives
 {
     public class Cylinder
-        : BSP
+        : Prism
     {
         public Cylinder(uint rotations)
-            : base(Prism.CreatePolygons(1, CalculatePoints(rotations + 2)), new BoundingBox(new Vector3(-1f), new Vector3(1f)), new object[] { "cylinder", rotations })
+            : this(rotations, 0, 1, new object[] { "cylinder", rotations })
         {
 
         }
 
-        private static Vector2[] CalculatePoints(uint rotations)
+        internal Cylinder(uint rotations, float initialAngle, float radius, object[] description)
+            : base(1, description, CalculatePoints(rotations + 2, initialAngle, radius))
+        {
+
+        }
+
+        private static Vector2[] CalculatePoints(uint rotations, float initialAngle, float radius)
         {
             Vector2[] positions = new Vector2[rotations];
 
             for (int i = 0; i < rotations; i++)
             {
-                float angle = MathHelper.TwoPi / rotations * i;
-                positions[i] = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
+                float angle = MathHelper.TwoPi / rotations * i + initialAngle;
+                positions[i] = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle)) * radius;
             }
 
             return positions;

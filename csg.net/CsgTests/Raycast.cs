@@ -11,33 +11,33 @@ namespace CsgTests
     [TestClass]
     public class Raycast
     {
-        [TestMethod]
-        public void CastIntoCube()
-        {
-            var c = new Cube();
+        //[TestMethod]
+        //public void CastIntoCube()
+        //{
+        //    var c = new Cube();
 
-            var f = c.RayCast(new Ray(new Vector3(-10, 0, 0), new Vector3(1, 0, 0)));
+        //    var f = c.RayCast(new Ray(new Vector3(-10, 0, 0), new Vector3(1, 0, 0)));
 
-            Assert.IsTrue(f.HasValue);
-            Assert.AreEqual(9.5, f.Value);
+        //    Assert.IsTrue(f.HasValue);
+        //    Assert.AreEqual(9.5, f.Value);
 
-            var f2 = c.RayCast(new Ray(new Vector3(-10, 0, 0), new Vector3(-1, 0, 0)));
+        //    var f2 = c.RayCast(new Ray(new Vector3(-10, 0, 0), new Vector3(-1, 0, 0)));
 
-            Assert.IsTrue(f.HasValue);
-            Assert.AreEqual(9.5, f.Value);
-        }
+        //    Assert.IsTrue(f.HasValue);
+        //    Assert.AreEqual(9.5, f.Value);
+        //}
 
-        [TestMethod]
-        public void CastIntoHollowCube()
-        {
-            var c = new Cube().Transform(Matrix.CreateScale(2));
-            var c2 = new Cube().Transform(Matrix.CreateScale(2, 1, 1));
+        //[TestMethod]
+        //public void CastIntoHollowCube()
+        //{
+        //    var c = new Cube().Transform(Matrix.CreateScale(2));
+        //    var c2 = new Cube().Transform(Matrix.CreateScale(2, 1, 1));
 
-            c.Subtract(c2);
+        //    c.Subtract(c2);
 
-            var f = c.RayCast(new Ray(new Vector3(-10, 0, 0), new Vector3(1, 0, 0)));
+        //    var f = c.RayCast(new Ray(new Vector3(-10, 0, 0), new Vector3(1, 0, 0)));
 
-            Assert.IsFalse(f.HasValue);
-        }
+        //    Assert.IsFalse(f.HasValue);
+        //}
     }
 }

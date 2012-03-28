@@ -9,10 +9,21 @@ namespace Xna.Csg.Primitives
     public class Prism
         :BSP
     {
+        public float Height { get; private set; }
+        public IEnumerable<Vector2> Footprint { get; private set; }
+
         public Prism(float height, params Vector2[] points)
             :base(CreatePolygons(height, points), MeasureBounds(height, points), CreateDescription(height, points))
         {
+            Height = height;
+            Footprint = points;
+        }
 
+        internal Prism(float height, object[] description, params Vector2[] points)
+            :base(CreatePolygons(height, points), MeasureBounds(height, points), description)
+        {
+            Height = height;
+            Footprint = points;
         }
 
         internal static IEnumerable<Polygon> CreatePolygons(float height, Vector2[] points)
