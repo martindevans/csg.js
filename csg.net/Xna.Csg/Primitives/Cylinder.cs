@@ -28,7 +28,7 @@ namespace Xna.Csg.Primitives
             for (int i = 0; i < rotations; i++)
             {
                 float angle = MathHelper.TwoPi / rotations * i + initialAngle;
-                positions[i] = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle)) * radius;
+                positions[rotations - i - 1] = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle)) * radius;
             }
 
             return positions;

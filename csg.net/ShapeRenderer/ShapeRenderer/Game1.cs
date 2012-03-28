@@ -58,25 +58,26 @@ namespace ShapeRenderer
             var c = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationZ(MathHelper.PiOver2));
 
             var d = new Cube().Transform(Matrix.CreateScale(15f * scale));
-            var e = new Sphere(3).Transform(Matrix.CreateScale(10 * scale));
+            var e = new Sphere(2).Transform(Matrix.CreateScale(8 * scale));
 
-            //var abc = a.Clone();
-            //abc.Union(b);
-            //abc.Union(c);
+            var abc = a.Clone();
+            abc.Union(b);
+            abc.Union(c);
 
-            //var de = d.Clone();
-            //de.Intersect(e);
+            var de = d.Clone();
+            de.Union(e);
 
-            //result = de.Clone();
-            //result.Subtract(abc);
+            shapeToRender = new Sphere(0).Transform(Matrix.CreateScale(2));
+            //shapeToRender.Subtract(new Cube().Transform(Matrix.CreateScale(3f, 3f, 3f) * Matrix.CreateTranslation(0, 0, 0)));
 
-            shapeToRender = new Prism(1, new Vector2[]
-            {
-                new Vector2(-1, -1),
-                new Vector2(1, -1),
-                new Vector2(1, 1),
-                new Vector2(-1, 1),
-            });
+            //shapeToRender = new Prism(1, new Vector2[]
+            //{
+            //    new Vector2(-1.2f, -1.2f),
+            //    new Vector2(1.2f, -1.2f),
+            //    new Vector2(1.2f, 1.2f),
+            //    new Vector2(-1.2f, 1.2f),
+            //});
+            //shapeToRender.Union(new Cylinder(1));
 
             sphere = new Sphere(2).Transform(Matrix.CreateScale(1f));
 
@@ -99,7 +100,7 @@ namespace ShapeRenderer
             wireframeState = new RasterizerState()
             {
                 FillMode = Microsoft.Xna.Framework.Graphics.FillMode.WireFrame,
-                CullMode = CullMode.None,
+                CullMode = CullMode.CullCounterClockwiseFace,
             };
         }
 
@@ -147,17 +148,19 @@ namespace ShapeRenderer
             effect.VertexColorEnabled = false;
             effect.TextureEnabled = false;
 
-            GraphicsDevice.RasterizerState = new RasterizerState()
-            {
-                CullMode = CullMode.None,
-            };
+            GraphicsDevice.RasterizerState = wireframeState;
+            //new RasterizerState()
+            //    {
+            //        CullMode = CullMode.CullCounterClockwiseFace,
+            //    };
             GraphicsDevice.DepthStencilState = new DepthStencilState()
             {
                 DepthBufferEnable=true,
                 DepthBufferWriteEnable=true,
             };
 
-            DrawShape(effect, shapeToRender, Matrix.CreateRotationY((float)gameTime.TotalGameTime.TotalSeconds / 3), Color.Green);
+            float time = (float)gameTime.TotalGameTime.TotalSeconds / 1.5f;
+            DrawShape(effect, shapeToRender, Matrix.CreateRotationY(time) * Matrix.CreateRotationX(time), Color.Green);
 
             //if (mouseIntersectionPosition.HasValue)
             //    DrawShape(effect, sphere, Matrix.CreateTranslation(mouseIntersectionPosition.Value), Color.Black);

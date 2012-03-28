@@ -18,7 +18,15 @@ namespace CsgTests
             BSP a = new Cube();
 
             Assert.IsTrue(a.Bounds.HasValue);
-            Assert.AreEqual(new BoundingBox(new Vector3(-0.5f), new Vector3(0.5f)), a.Bounds.Value);
+            //Assert.AreEqual(new BoundingBox(new Vector3(-0.5f), new Vector3(0.5f)), a.Bounds.Value);
+
+            float epsilon = 0.00001f;
+            Assert.AreEqual(-0.5f, a.Bounds.Value.Min.X, epsilon);
+            Assert.AreEqual(-0.5f, a.Bounds.Value.Min.Y, epsilon);
+            Assert.AreEqual(-0.5f, a.Bounds.Value.Min.Z, epsilon);
+            Assert.AreEqual(0.5f, a.Bounds.Value.Max.X, epsilon);
+            Assert.AreEqual(0.5f, a.Bounds.Value.Max.Y, epsilon);
+            Assert.AreEqual(0.5f, a.Bounds.Value.Max.Z, epsilon);
         }
 
         [TestMethod]
@@ -27,7 +35,14 @@ namespace CsgTests
             BSP a = new Cube().Transform(Matrix.CreateTranslation(0.1f, 0, 0));
 
             Assert.IsTrue(a.Bounds.HasValue);
-            Assert.AreEqual(new BoundingBox(new Vector3(-0.4f, -0.5f, -0.5f), new Vector3(0.6f, 0.5f, 0.5f)), a.Bounds.Value);
+
+            float epsilon = 0.00001f;
+            Assert.AreEqual(-0.4f, a.Bounds.Value.Min.X, epsilon);
+            Assert.AreEqual(-0.5f, a.Bounds.Value.Min.Y, epsilon);
+            Assert.AreEqual(-0.5f, a.Bounds.Value.Min.Z, epsilon);
+            Assert.AreEqual(0.6f, a.Bounds.Value.Max.X, epsilon);
+            Assert.AreEqual(0.5f, a.Bounds.Value.Max.Y, epsilon);
+            Assert.AreEqual(0.5f, a.Bounds.Value.Max.Z, epsilon);
         }
 
         [TestMethod]
@@ -39,7 +54,14 @@ namespace CsgTests
             a.Union(b);
 
             Assert.IsTrue(a.Bounds.HasValue);
-            Assert.AreEqual(new BoundingBox(new Vector3(-0.5f), new Vector3(0.6f, 0.5f, 0.5f)), a.Bounds.Value);
+
+            float epsilon = 0.00001f;
+            Assert.AreEqual(-0.5f, a.Bounds.Value.Min.X, epsilon);
+            Assert.AreEqual(-0.5f, a.Bounds.Value.Min.Y, epsilon);
+            Assert.AreEqual(-0.5f, a.Bounds.Value.Min.Z, epsilon);
+            Assert.AreEqual(0.6f, a.Bounds.Value.Max.X, epsilon);
+            Assert.AreEqual(0.5f, a.Bounds.Value.Max.Y, epsilon);
+            Assert.AreEqual(0.5f, a.Bounds.Value.Max.Z, epsilon);
         }
     }
 }

@@ -21,17 +21,18 @@ namespace Xna.Csg
         public Vertex[] Vertices;
 
         public Polygon(Vertex a, Vertex b, Vertex c)
+            :this(new[] { a, b, c })
         {
-            Plane = new Plane(a.Position, b.Position, c.Position);
-
-            Vertices = new[] { a, b, c };
         }
 
         public Polygon(IEnumerable<Vertex> vertices)
         {
             Vertices = vertices.ToArray();
 
-            Plane = new Plane(vertices.First().Position, vertices.Skip(1).First().Position, vertices.Skip(2).First().Position);
+            if (Vertices[0].Position == Vertices[1].Position || Vertices[0].Position == Vertices[2].Position || Vertices[1].Position == Vertices[2].Position)
+                throw new ArgumentException("Degenerate polygon");
+
+            Plane = new Plane(Vertices[0].Position, Vertices[1].Position, Vertices[2].Position);
         }
 
         public void CalculateVertexNormals()

@@ -26,7 +26,8 @@ namespace Xna.Csg.Primitives
                 new Vector3(0.850651082f, 0.52573067f,0),
                 new Vector3(-0.850651082f, 0.52573067f,0),
                 new Vector3(0.850651082f, -0.52573067f,0),
-                new Vector3(-0.850651082f, -0.52573067f,0)};
+                new Vector3(-0.850651082f, -0.52573067f,0)
+        };
         static int[][] icosahedronIndices = new int[][] {
                 new[] { 0, 6, 1 },
                 new[] { 0, 11, 6},
