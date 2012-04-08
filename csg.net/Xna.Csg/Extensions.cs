@@ -64,8 +64,8 @@ namespace Xna.Csg
                         }
                     }
 
-                    if (f.Count >= 3) front.Add(new Polygon(f));
-                    if (b.Count >= 3) back.Add(new Polygon(b));
+                    if (f.Count >= 3 && !Polygon.IsDegenerateSet(f)) front.Add(new Polygon(f));
+                    if (b.Count >= 3 && !Polygon.IsDegenerateSet(b)) back.Add(new Polygon(b));
 
                     break;
             }

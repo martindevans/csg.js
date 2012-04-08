@@ -27,9 +27,9 @@ namespace Xna.Csg
 
         public Polygon(IEnumerable<Vertex> vertices)
         {
-            Vertices = vertices.ToArray();
+            Vertices = vertices.GroupBy(a => a.Position).Select(a => a.First()).ToArray();
 
-            if (Vertices[0].Position == Vertices[1].Position || Vertices[0].Position == Vertices[2].Position || Vertices[1].Position == Vertices[2].Position)
+            if (Vertices.Length < 3)
                 throw new ArgumentException("Degenerate polygon");
 
             Plane = new Plane(Vertices[0].Position, Vertices[1].Position, Vertices[2].Position);
@@ -51,6 +51,11 @@ namespace Xna.Csg
         public Polygon Clone()
         {
             return new Polygon(Vertices);
+        }
+
+        public static bool IsDegenerateSet(IEnumerable<Vertex> set)
+        {
+            return set.GroupBy(a => a.Position).Select(a => a.First()).Count() < 3;
         }
     }
 }

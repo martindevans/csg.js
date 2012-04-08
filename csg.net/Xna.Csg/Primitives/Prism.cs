@@ -13,10 +13,8 @@ namespace Xna.Csg.Primitives
         public IEnumerable<Vector2> Footprint { get; private set; }
 
         public Prism(float height, params Vector2[] points)
-            :base(CreatePolygons(height, points), MeasureBounds(height, points), CreateDescription(height, points))
+            :this(height, CreateDescription(height, points), points)
         {
-            Height = height;
-            Footprint = points;
         }
 
         internal Prism(float height, object[] description, params Vector2[] points)
@@ -32,8 +30,12 @@ namespace Xna.Csg.Primitives
             var top = new Polygon(points.Select(a => new Vector3(a.X, height / 2, a.Y)).Select(a => new Vertex(a, Vector3.Zero)));
             top.CalculateVertexNormals();
 
-            if (top.Plane.D > 0)
-                throw new ArgumentException("Prism wound wrong way");
+            if (Vector3.Dot(Vector3.Up, top.Plane.Normal) < 0)
+            {
+                foreach (var item in CreatePolygons(height, points.Reverse().ToArray()))
+                    yield return item;
+                yield break;
+            }
 
             yield return top;
 
@@ -70,7 +72,7 @@ namespace Xna.Csg.Primitives
 
         private static object[] CreateDescription(float height, Vector2[] points)
         {
-            object[] description = new object[3 + points.Length * 2];
+            object[] description = new object[4 + points.Length * 2];
 
             description[0] = "prism";
             description[1] = height;
