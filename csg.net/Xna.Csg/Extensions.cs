@@ -8,7 +8,7 @@ namespace Xna.Csg
 {
     public static class Extensions
     {
-        public const float EPSILON = 1e-5f;
+        public const float EPSILON = 1e-4f;
 
         public static void SplitPolygon(this Plane plane, Polygon polygon, IList<Polygon> coPlanarFront, IList<Polygon> coPlanarBack, IList<Polygon> front, IList<Polygon> back)
         {

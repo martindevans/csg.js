@@ -30,7 +30,8 @@ namespace Xna.Csg.Primitives
             var top = new Polygon(points.Select(a => new Vector3(a.X, height / 2, a.Y)).Select(a => new Vertex(a, Vector3.Zero)));
             top.CalculateVertexNormals();
 
-            if (Vector3.Dot(Vector3.Up, top.Plane.Normal) < 0)
+            float dot = Vector3.Dot(Vector3.Up, top.Plane.Normal);
+            if (dot < 0)
             {
                 foreach (var item in CreatePolygons(height, points.Reverse().ToArray()))
                     yield return item;

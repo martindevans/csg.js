@@ -85,8 +85,7 @@ namespace Xna.Csg
 
         public virtual BSP Transform(Matrix transformation)
         {
-            BSP b = new BSP(
-                root
+            var polys = root
                 .AllPolygons
                 .Select(a =>
                     new Polygon(
@@ -94,7 +93,10 @@ namespace Xna.Csg
                             new Vertex(Vector3.Transform(v.Position, transformation), Vector3.TransformNormal(v.Normal, transformation))
                         )
                     )
-                ),
+                );
+
+            BSP b = new BSP(
+                polys,
                 Bounds.Value.Transform(transformation),
                 CreateDescription("transform", description, transformation.M11, transformation.M12, transformation.M13, transformation.M14, transformation.M21, transformation.M22, transformation.M23, transformation.M24, transformation.M31, transformation.M32, transformation.M33, transformation.M34, transformation.M41, transformation.M42, transformation.M43, transformation.M44)
             );
