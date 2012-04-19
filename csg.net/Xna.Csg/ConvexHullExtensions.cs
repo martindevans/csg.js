@@ -68,6 +68,8 @@ namespace Xna.Csg
 
             foreach (var item in points)
             {
+                if (item == furthest)
+                    continue;
                 if (IsLeftOfLine(item, baseLineAnchor, leftDir))
                     leftOuterPointers.Add(item);
                 else if (IsLeftOfLine(item, furthest, rightDir)) //Left of a downwards pointing line is the right
@@ -95,6 +97,26 @@ namespace Xna.Csg
         public static bool IsLeftOfLine(Vector2 point, Vector2 anchor, Vector2 direction)
         {
             return direction.X * (point.Y - anchor.Y) - direction.Y * (point.X - anchor.X) > 0;
+        }
+
+        public static float ConvexHullArea(this IEnumerable<Vector2> hull, bool preserveWindingSign = false)
+        {
+            //http://www.mathopenref.com/coordpolygonarea.html
+
+            float area = hull.Zip(hull.Skip(1).Append(hull), (a, b) =>
+                {
+                    return a.X * b.Y - a.Y * b.X;
+                }
+            ).Aggregate((a, b) =>
+                {
+                    return a + b;
+                }
+            ) / 2;
+
+            if (preserveWindingSign)
+                return area;
+            else
+                return Math.Abs(area);
         }
     }
 }
