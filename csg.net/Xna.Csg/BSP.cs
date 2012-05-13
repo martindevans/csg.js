@@ -155,6 +155,7 @@ namespace Xna.Csg
         public virtual void Subtract(BSP bInput)
         {
             var a = this.root;
+
             var b = bInput.root.Clone();
 
             a.Invert();
@@ -319,7 +320,7 @@ namespace Xna.Csg
             }
 
             [ThreadStatic]
-            private static Random random = new Random();
+            private static Random random;
             private static Polygon SelectSplitPlane(IEnumerable<Polygon> polygons)
             {
                 int count = polygons.Count();
@@ -329,6 +330,9 @@ namespace Xna.Csg
 
                 if (count == 1)
                     return polygons.First();
+
+                if (random == null)
+                    random = new Random();
 
                 return polygons.Skip(random.Next(0, count - 1)).First();
             }
