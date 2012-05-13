@@ -318,14 +318,29 @@ namespace Xna.Csg
                     back.ClipTo(other);
             }
 
+            private Random random = new Random();
+            private Polygon SelectSplitPlane(IEnumerable<Polygon> polygons)
+            {
+                int count = polygons.Count();
+
+                if (count == 0)
+                    return null;
+
+                if (count == 1)
+                    return polygons.First();
+
+                return polygons.Skip(random.Next(0, count - 1)).First();
+            }
+
             public void Build(IEnumerable<Polygon> polygons)
             {
                 if (!splitPlane.HasValue)
                 {
-                    if (polygons.FirstOrDefault() == null)
+                    var split = SelectSplitPlane(polygons);
+                    if (split == null)
                         return;
                     else
-                        splitPlane = polygons.First().Plane;
+                        splitPlane = split.Plane;
                 }
 
                 List<Polygon> frontPolys = new List<Polygon>();
