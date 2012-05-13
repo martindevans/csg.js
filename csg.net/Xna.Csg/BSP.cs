@@ -318,8 +318,9 @@ namespace Xna.Csg
                     back.ClipTo(other);
             }
 
-            private Random random = new Random();
-            private Polygon SelectSplitPlane(IEnumerable<Polygon> polygons)
+            [ThreadStatic]
+            private static Random random = new Random();
+            private static Polygon SelectSplitPlane(IEnumerable<Polygon> polygons)
             {
                 int count = polygons.Count();
 
@@ -332,37 +333,48 @@ namespace Xna.Csg
                 return polygons.Skip(random.Next(0, count - 1)).First();
             }
 
-            public void Build(IEnumerable<Polygon> polygons)
+            private static void Build(Node node, IEnumerable<Polygon> polygons, Queue<KeyValuePair<Node, IEnumerable<Polygon>>> todo)
             {
-                if (!splitPlane.HasValue)
+                if (!node.splitPlane.HasValue)
                 {
                     var split = SelectSplitPlane(polygons);
                     if (split == null)
                         return;
                     else
-                        splitPlane = split.Plane;
+                        node.splitPlane = split.Plane;
                 }
 
                 List<Polygon> frontPolys = new List<Polygon>();
                 List<Polygon> backPolys = new List<Polygon>();
 
                 foreach (var poly in polygons)
-                {
-                    splitPlane.Value.SplitPolygon(poly, this.polygons, this.polygons, frontPolys, backPolys);
-                }
+                    node.splitPlane.Value.SplitPolygon(poly, node.polygons, node.polygons, frontPolys, backPolys);
 
                 if (frontPolys.Count > 0)
                 {
-                    if (front == null)
-                        front = new Node();
-                    front.Build(frontPolys);
+                    if (node.front == null)
+                        node.front = new Node();
+                    todo.Enqueue(new KeyValuePair<Node, IEnumerable<Polygon>>(node.front, frontPolys));
                 }
 
                 if (backPolys.Count > 0)
                 {
-                    if (back == null)
-                        back = new Node();
-                    back.Build(backPolys);
+                    if (node.back == null)
+                        node.back = new Node();
+                    todo.Enqueue(new KeyValuePair<Node, IEnumerable<Polygon>>(node.back, backPolys));
+                }
+            }
+
+            public void Build(IEnumerable<Polygon> polygons)
+            {
+                Queue<KeyValuePair<Node, IEnumerable<Polygon>>> todo = new Queue<KeyValuePair<Node, IEnumerable<Polygon>>>();
+
+                todo.Enqueue(new KeyValuePair<Node, IEnumerable<Polygon>>(this, polygons));
+
+                while (todo.Count > 0)
+                {
+                    var work = todo.Dequeue();
+                    Build(work.Key, work.Value, todo);
                 }
             }
 

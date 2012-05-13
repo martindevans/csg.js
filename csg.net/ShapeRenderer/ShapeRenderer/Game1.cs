@@ -66,14 +66,14 @@ namespace ShapeRenderer
             shapeToRender = d.Clone();
             shapeToRender.Subtract(abc);
 
-            shapeToRender.Intersect(new Prism(1, new Vector2[]
-            {
-                new Vector2(-1.2f, -1.2f),
-                new Vector2(1.2f, -1.2f),
-                new Vector2(1.2f, 1.2f),
-                new Vector2(0f, 2f),
-                new Vector2(-1.2f, 1.2f),
-            }));
+            //shapeToRender.Intersect(new Prism(1, new Vector2[]
+            //{
+            //    new Vector2(-1.2f, -1.2f),
+            //    new Vector2(1.2f, -1.2f),
+            //    new Vector2(1.2f, 1.2f),
+            //    new Vector2(0f, 2f),
+            //    new Vector2(-1.2f, 1.2f),
+            //}));
             //shapeToRender.Intersect(new Cylinder(1));
 
             base.Initialize();
