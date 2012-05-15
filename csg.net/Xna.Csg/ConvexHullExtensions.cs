@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 
 namespace Xna.Csg
@@ -104,19 +103,14 @@ namespace Xna.Csg
             //http://www.mathopenref.com/coordpolygonarea.html
 
             float area = hull.Zip(hull.Skip(1).Append(hull), (a, b) =>
-                {
-                    return a.X * b.Y - a.Y * b.X;
-                }
+                a.X * b.Y - a.Y * b.X
             ).Aggregate((a, b) =>
-                {
-                    return a + b;
-                }
+                    a + b
             ) / 2;
 
             if (preserveWindingSign)
                 return area;
-            else
-                return Math.Abs(area);
+            return Math.Abs(area);
         }
     }
 }

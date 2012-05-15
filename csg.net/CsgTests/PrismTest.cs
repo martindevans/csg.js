@@ -1,10 +1,8 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Xna.Csg.Primitives;
 using Microsoft.Xna.Framework;
+using Xna.Csg.Primitives;
 
 namespace CsgTests
 {
@@ -23,6 +21,7 @@ namespace CsgTests
 
             foreach (var v in c.Polygons.SelectMany(a => a.Vertices))
             {
+                Debug.Assert(c.Bounds != null, "c.Bounds != null");
                 Assert.IsTrue(c.Bounds.Value.Contains(v.Position) != ContainmentType.Disjoint);
             }
         }

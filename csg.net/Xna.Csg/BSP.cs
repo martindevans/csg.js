@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
-using System.IO;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 namespace Xna.Csg
 {
     public class BSP
         :ICsgProvider
     {
+        bool _createDescription;
         object[] description;
         public IEnumerable<object> Description
         {
@@ -37,35 +35,41 @@ namespace Xna.Csg
         }
 
         #region constructors
-        public BSP()
-            :this(new Node(), null, new object[0])
+        public BSP(bool createDescription = true)
+            :this(new Node(), null, createDescription ? new object[0] : null)
         {
+            _createDescription = createDescription;
         }
 
-        protected BSP(IEnumerable<Polygon> polygons, BoundingBox bounds, object[] description)
+        protected BSP(IEnumerable<Polygon> polygons, BoundingBox bounds, object[] description, bool createDescription = true)
             : this()
         {
+            _createDescription = createDescription;
             root.Build(polygons);
             this.Bounds = bounds;
             this.description = description;
         }
 
-        private BSP(Node root, BoundingBox? bounds, object[] description)
+        private BSP(Node root, BoundingBox? bounds, object[] description, bool createDescription = true)
         {
             this.root = root;
             this.Bounds = bounds;
             this.description = description;
+            this._createDescription = createDescription;
         }
 
         public BSP Clone()
         {
-            return new BSP(root.Clone(), Bounds, description);
+            return new BSP(root.Clone(), Bounds, description, _createDescription);
         }
         #endregion
 
         private object[] CreateDescription(string operation, object[] existing, params object[] args)
         {
-            return new object[] { operation }.Append(existing).Append(args).ToArray();
+            if (_createDescription)
+                return new object[] { operation }.Append(existing).Append(args).ToArray();
+
+            return null;
         }
 
         private BoundingBox? MeasureBounds(BSP bsp)
@@ -100,7 +104,7 @@ namespace Xna.Csg
                 Bounds.Value.Transform(transformation),
                 CreateDescription("transform", description, transformation.M11, transformation.M12, transformation.M13, transformation.M14, transformation.M21, transformation.M22, transformation.M23, transformation.M24, transformation.M31, transformation.M32, transformation.M33, transformation.M34, transformation.M41, transformation.M42, transformation.M43, transformation.M44)
             );
-
+            
             InvokeChange();
 
             return b;
@@ -454,7 +458,7 @@ namespace Xna.Csg
                 float distance = r.Position.Distance(splitPlane.Value);
                 Vector3 planeIntersectionPoint = r.Position + r.Direction * distance;
 
-                if (distance < -Extensions.EPSILON)
+                if (distance < -Extensions.Epsilon)
                 {
                     var b = RayCastNode(back, r);
                     if (b.HasValue)
@@ -470,7 +474,7 @@ namespace Xna.Csg
                             return f;
                     }
                 }
-                else if (distance > Extensions.EPSILON)
+                else if (distance > Extensions.Epsilon)
                 {
                     var f = RayCastNode(front, new Ray(r.Position + r.Direction * distance, r.Direction));
                     if (f.HasValue)

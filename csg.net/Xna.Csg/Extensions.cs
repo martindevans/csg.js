@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 
 namespace Xna.Csg
 {
     public static class Extensions
     {
-        public const float EPSILON = 1e-4f;
+        public const float Epsilon = 1e-4f;
 
         public static void SplitPolygon(this Plane plane, Polygon polygon, IList<Polygon> coPlanarFront, IList<Polygon> coPlanarBack, IList<Polygon> front, IList<Polygon> back)
         {
             List<PolygonType> types = new List<PolygonType>();
-            PolygonType polygonType = (PolygonType)0;
+            PolygonType polygonType = 0;
 
             for (int i = 0; i < polygon.Vertices.Length; i++)
             {
                 var t = polygon.Vertices[i].Position.Distance(plane);
 
-                var type = (t < -EPSILON) ? PolygonType.Back : (t > EPSILON) ? PolygonType.Front : PolygonType.Coplanar;
+                var type = (t < -Epsilon) ? PolygonType.Back : (t > Epsilon) ? PolygonType.Front : PolygonType.Coplanar;
                 polygonType |= type;
                 types.Add(type);
             }
