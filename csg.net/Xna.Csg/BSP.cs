@@ -379,8 +379,10 @@ namespace Xna.Csg
 
                 todo.Enqueue(new KeyValuePair<Node, IEnumerable<Polygon>>(this, polygons));
 
+                int loops = 0;
                 while (todo.Count > 0)
                 {
+                    loops++;
                     var work = todo.Dequeue();
                     Build(work.Key, work.Value, todo);
                 }

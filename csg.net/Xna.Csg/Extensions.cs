@@ -7,20 +7,27 @@ namespace Xna.Csg
 {
     public static class Extensions
     {
-        public const float Epsilon = 1e-4f;
+        public const float Epsilon = 1e-3f;
 
         public static void SplitPolygon(this Plane plane, Polygon polygon, IList<Polygon> coPlanarFront, IList<Polygon> coPlanarBack, IList<Polygon> front, IList<Polygon> back)
         {
             List<PolygonType> types = new List<PolygonType>();
             PolygonType polygonType = 0;
 
-            for (int i = 0; i < polygon.Vertices.Length; i++)
+            if (plane == polygon.Plane)
+                types.Add(PolygonType.Coplanar);
+            else
             {
-                var t = polygon.Vertices[i].Position.Distance(plane);
+                for (int i = 0; i < polygon.Vertices.Length; i++)
+                {
+                    var t = polygon.Vertices[i].Position.Distance(plane);
 
-                var type = (t < -Epsilon) ? PolygonType.Back : (t > Epsilon) ? PolygonType.Front : PolygonType.Coplanar;
-                polygonType |= type;
-                types.Add(type);
+                    var type = (t < -Epsilon)
+                                   ? PolygonType.Back
+                                   : (t > Epsilon) ? PolygonType.Front : PolygonType.Coplanar;
+                    polygonType |= type;
+                    types.Add(type);
+                }
             }
 
             switch (polygonType)
