@@ -23,8 +23,6 @@ namespace CsgTests
                 new Vertex(new Vector3(1,0,0), Vector3.Zero),
             });
 
-            p.CalculateVertexNormals();
-
             Assert.AreEqual(Vector3.Up, p.Plane.Normal);
         }
     }

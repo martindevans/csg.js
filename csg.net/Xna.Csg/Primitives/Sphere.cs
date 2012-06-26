@@ -9,8 +9,8 @@ namespace Xna.Csg.Primitives
     public class Sphere
         : BSP
     {
-        public Sphere(uint subdivisions = 0)
-            : base(Subdivide(CreatePolygons(), subdivisions), new BoundingBox(new Vector3(-1f), new Vector3(1f)), new object[] { "sphere", subdivisions })
+        public Sphere(uint subdivisions = 0, Func<Vector3, Vector3, Vertex> vertexFactory = null)
+            : base(Subdivide(CreatePolygons(vertexFactory), subdivisions, vertexFactory), new BoundingBox(new Vector3(-1f), new Vector3(1f)), new object[] { "sphere", subdivisions })
         {
         }
 
@@ -51,38 +51,37 @@ namespace Xna.Csg.Primitives
                 new[] { 9, 11, 0}
         };
 
-        private static IEnumerable<Polygon> CreatePolygons()
+        private static IEnumerable<Polygon> CreatePolygons(Func<Vector3, Vector3, Vertex> vertexFactory = null)
         {
-            var vertices = icosahedronVertices.Select(a => new Vertex(a, a)).ToArray();
+            vertexFactory = vertexFactory ?? ((p, n) => new Vertex(p, n));
+
+            var vertices = icosahedronVertices.Select(a => vertexFactory(a, a)).ToArray();
 
             return icosahedronIndices.Select(a => new Polygon(a.Select(i => vertices[i])));
         }
 
-        private static IEnumerable<Polygon> Subdivide(IEnumerable<Polygon> polygons, uint subdivisions)
+        private static IEnumerable<Polygon> Subdivide(IEnumerable<Polygon> polygons, uint subdivisions, Func<Vector3, Vector3, Vertex> vertexFactory = null)
         {
+            vertexFactory = vertexFactory ?? ((p, n) => new Vertex(p, n));
+
             for (int i = 0; i < subdivisions; i++)
             {
-                polygons = Subdivide(polygons).ToArray();
+                polygons = Subdivide(polygons, vertexFactory).ToArray();
             }
 
             return polygons;
         }
 
-        private static IEnumerable<Polygon> Subdivide(IEnumerable<Polygon> polygons)
+        private static IEnumerable<Polygon> Subdivide(IEnumerable<Polygon> polygons, Func<Vector3, Vector3, Vertex> vertexFactory)
         {
-            return polygons.AsParallel().SelectMany(a => Subdivide(a));
+            return polygons.AsParallel().SelectMany(a => Subdivide(a, vertexFactory));
         }
 
-        private static IEnumerable<Polygon> Subdivide(Polygon polygon)
+        private static IEnumerable<Polygon> Subdivide(Polygon polygon, Func<Vector3, Vector3, Vertex> vertexFactory)
         {
-            Vector3 abMidPosition = Vector3.Normalize((polygon.Vertices[0].Position + polygon.Vertices[1].Position) / 2f);
-            Vertex abMid = new Vertex(abMidPosition, abMidPosition);
-
-            Vector3 bcMidPosition = Vector3.Normalize((polygon.Vertices[1].Position + polygon.Vertices[2].Position) / 2f);
-            Vertex bcMid = new Vertex(bcMidPosition, bcMidPosition);
-
-            Vector3 caMidPosition = Vector3.Normalize((polygon.Vertices[2].Position + polygon.Vertices[0].Position) / 2f);
-            Vertex caMid = new Vertex(caMidPosition, caMidPosition);
+            Vertex abMid = polygon.Vertices[0].Interpolate(polygon.Vertices[1], 0.5f);
+            Vertex bcMid = polygon.Vertices[1].Interpolate(polygon.Vertices[2], 0.5f);
+            Vertex caMid = polygon.Vertices[2].Interpolate(polygon.Vertices[0], 0.5f);
 
             yield return new Polygon(polygon.Vertices[0], abMid, caMid);
             yield return new Polygon(abMid, polygon.Vertices[1], bcMid);

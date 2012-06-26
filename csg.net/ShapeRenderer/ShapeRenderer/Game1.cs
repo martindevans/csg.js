@@ -53,11 +53,11 @@ namespace ShapeRenderer
 
             float scale = 0.2f;
 
-            var a = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale));
-            var b = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationX(MathHelper.PiOver2));
-            var c = new Cylinder(10).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationZ(MathHelper.PiOver2));
+            var a = new Cylinder(10, (p, n) => new ColorVertex(p, n, Color.Red)).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale));
+            var b = new Cylinder(10, (p, n) => new ColorVertex(p, n, Color.Green)).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationX(MathHelper.PiOver2));
+            var c = new Cylinder(10, (p, n) => new ColorVertex(p, n, Color.Blue)).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationZ(MathHelper.PiOver2));
 
-            var d = new Cube().Transform(Matrix.CreateScale(15f * scale));
+            var d = new Cube((p, n) => new ColorVertex(p, n, Color.Black)).Transform(Matrix.CreateScale(15f * scale));
 
             var abc = a.Clone();
             abc.Union(b);
@@ -140,7 +140,7 @@ namespace ShapeRenderer
 
             effect.View = view;
             effect.Projection = projection;
-            effect.VertexColorEnabled = false;
+            effect.VertexColorEnabled = true;
             effect.TextureEnabled = false;
 
             GraphicsDevice.RasterizerState = wireframeState;
@@ -155,7 +155,7 @@ namespace ShapeRenderer
             };
 
             float time = (float)gameTime.TotalGameTime.TotalSeconds / 1.5f;
-            DrawShape(effect, shapeToRender, Matrix.CreateRotationY(time) * Matrix.CreateRotationX(time), Color.Green);
+            DrawShape(effect, shapeToRender, Matrix.CreateRotationY(time) * Matrix.CreateRotationX(time) * Matrix.CreateTranslation(0, -0.5f, 0), Color.Green);
 
             //if (mouseIntersectionPosition.HasValue)
             //    DrawShape(effect, sphere, Matrix.CreateTranslation(mouseIntersectionPosition.Value), Color.Black);
@@ -165,11 +165,11 @@ namespace ShapeRenderer
 
         private void DrawShape(BasicEffect e, BSP bsp, Matrix transform, Color color)
         {
-            List<VertexPositionNormalTexture> vertices = new List<VertexPositionNormalTexture>();
+            List<VertexPositionColor> vertices = new List<VertexPositionColor>();
             List<int> indices = new List<int>();
 
-            bsp.ToTriangleList<VertexPositionNormalTexture, int>(
-                (p, n) => new VertexPositionNormalTexture(p, n, Vector2.Zero),
+            bsp.ToTriangleList<VertexPositionColor, int>(
+                v => new VertexPositionColor(v.Position, v is ColorVertex ? ((ColorVertex)v).Color : Color.White),
                 v =>
                 {
                     vertices.Add(v);
@@ -183,13 +183,13 @@ namespace ShapeRenderer
                 }
             );
 
-            DrawShape<VertexPositionNormalTexture>(effect, vertices.ToArray(), indices.ToArray(), transform);
+            DrawShape<VertexPositionColor>(effect, vertices.ToArray(), indices.ToArray(), transform);
         }
 
         private void DrawShape<V>(BasicEffect e, V[] vertices, int[] indices, Matrix transform) where V : struct, IVertexType
         {
             e.World = transform;
-            e.EnableDefaultLighting();
+            //e.EnableDefaultLighting();
 
             foreach (var item in e.Techniques)
             {

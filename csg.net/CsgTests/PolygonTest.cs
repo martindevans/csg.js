@@ -27,8 +27,9 @@ namespace CsgTests
             Vector3 cbaNormal = Vector3.Cross(b.Position - c.Position, a.Position - c.Position);
             Assert.AreEqual(cbaNormal, cba.Plane.Normal);
 
-            Assert.AreEqual(abc.Plane, cba.Flip().Plane);
             Assert.AreNotEqual(abc.Plane, cba.Plane);
+            cba.Flip();
+            Assert.AreEqual(abc.Plane, cba.Plane);
         }
 
         [TestMethod]

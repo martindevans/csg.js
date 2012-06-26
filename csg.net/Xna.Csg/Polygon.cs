@@ -16,9 +16,18 @@ namespace Xna.Csg
 
     public class Polygon
     {
-        public readonly Plane Plane;
+        public Plane Plane { get; private set; }
 
-        public Vertex[] Vertices;
+        private Vertex[] _vertices;
+        public Vertex[] Vertices
+        {
+            get { return _vertices; }
+            set
+            {
+                _vertices = value;
+                CalculatePlane();
+            }
+        }
 
         public Polygon(Vertex a, Vertex b, Vertex c)
             :this(new[] { a, b, c })
@@ -31,21 +40,21 @@ namespace Xna.Csg
 
             if (Vertices.Length < 3)
                 throw new ArgumentException("Degenerate polygon");
+        }
 
+        private void CalculatePlane()
+        {
             Plane = new Plane(Vertices[0].Position, Vertices[1].Position, Vertices[2].Position);
-        }
 
-        public void CalculateVertexNormals()
-        {
             for (int i = 0; i < Vertices.Length; i++)
-            {
                 Vertices[i].Normal = Plane.Normal;
-            }
         }
 
-        public Polygon Flip()
+        public void Flip()
         {
-            return new Polygon(Vertices.Select(a => a.Flip()).Reverse());
+            foreach (var vertex in Vertices)
+                vertex.Flip();
+            Vertices = _vertices.Reverse().ToArray();
         }
 
         public Polygon Clone()

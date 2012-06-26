@@ -12,23 +12,29 @@ namespace Xna.Csg.Primitives
         public float Height { get; private set; }
         public IEnumerable<Vector2> Footprint { get; private set; }
 
-        public Prism(float height, params Vector2[] points)
-            :this(height, CreateDescription(height, points), points)
+        public Prism(float height, Func<Vector3, Vector3, Vertex> vertexFactory, params Vector2[] points)
+            : this(height, CreateDescription(height, points), vertexFactory, points)
         {
         }
 
-        internal Prism(float height, object[] description, params Vector2[] points)
-            :base(CreatePolygons(height, points), MeasureBounds(height, points), description)
+        public Prism(float height, params Vector2[] points)
+            :this(height, CreateDescription(height, points), null, points)
+        {
+        }
+
+        internal Prism(float height, object[] description, Func<Vector3, Vector3, Vertex> vertexFactory = null, params Vector2[] points)
+            :base(CreatePolygons(height, points, vertexFactory), MeasureBounds(height, points), description)
         {
             Height = height;
             Footprint = points;
         }
 
-        internal static IEnumerable<Polygon> CreatePolygons(float height, Vector2[] points)
+        internal static IEnumerable<Polygon> CreatePolygons(float height, Vector2[] points, Func<Vector3, Vector3, Vertex> vertexFactory = null)
         {
+            vertexFactory = vertexFactory ?? ((p, n) => new Vertex(p, n));
+
             //top circle
-            var top = new Polygon(points.Select(a => new Vector3(a.X, height / 2, a.Y)).Select(a => new Vertex(a, Vector3.Zero)));
-            top.CalculateVertexNormals();
+            var top = new Polygon(points.Select(a => new Vector3(a.X, height / 2, a.Y)).Select(a => vertexFactory(a, Vector3.Zero)));
 
             float dot = Vector3.Dot(Vector3.Up, top.Plane.Normal);
             if (dot < 0)
@@ -41,8 +47,7 @@ namespace Xna.Csg.Primitives
             yield return top;
 
             //bottom circle
-            var bottom = new Polygon(points.Reverse().Select(a => new Vector3(a.X, -height / 2, a.Y)).Select(a => new Vertex(a, Vector3.Zero)));
-            bottom.CalculateVertexNormals();
+            var bottom = new Polygon(points.Reverse().Select(a => new Vector3(a.X, -height / 2, a.Y)).Select(a => vertexFactory(a, Vector3.Zero)));
             yield return bottom;
 
             //sides
@@ -52,12 +57,11 @@ namespace Xna.Csg.Primitives
                 Vector2 pos2 = points[i];
 
                 var poly = new Polygon(new Vertex[] {                                  
-                    new Vertex(new Vector3(pos2.X, height / 2, pos2.Y), Vector3.Zero),
-                    new Vertex(new Vector3(pos2.X, -height / 2, pos2.Y), Vector3.Zero),
-                    new Vertex(new Vector3(pos1.X, -height / 2, pos1.Y), Vector3.Zero),
-                    new Vertex(new Vector3(pos1.X, height / 2, pos1.Y), Vector3.Zero),
+                    vertexFactory(new Vector3(pos2.X, height / 2, pos2.Y), Vector3.Zero),
+                    vertexFactory(new Vector3(pos2.X, -height / 2, pos2.Y), Vector3.Zero),
+                    vertexFactory(new Vector3(pos1.X, -height / 2, pos1.Y), Vector3.Zero),
+                    vertexFactory(new Vector3(pos1.X, height / 2, pos1.Y), Vector3.Zero),
                 });
-                poly.CalculateVertexNormals();
 
                 yield return poly;
             }

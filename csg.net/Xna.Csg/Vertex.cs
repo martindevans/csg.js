@@ -6,9 +6,9 @@ using Microsoft.Xna.Framework;
 
 namespace Xna.Csg
 {
-    public struct Vertex
+    public class Vertex
     {
-        public readonly Vector3 Position;
+        public Vector3 Position;
         public Vector3 Normal;
 
         public Vertex(Vector3 position, Vector3 normal)
@@ -17,12 +17,12 @@ namespace Xna.Csg
             Normal = Vector3.Normalize(normal);
         }
 
-        public Vertex Flip()
+        public void Flip()
         {
-            return new Vertex(Position, -Normal);
+            Normal = -Normal;
         }
 
-        public Vertex Interpolate(Vertex other, float t)
+        public virtual Vertex Interpolate(Vertex other, float t)
         {
             return new Vertex(Vector3.Lerp(Position, other.Position, t), Vector3.Lerp(Normal, other.Normal, t));
         }
@@ -30,6 +30,19 @@ namespace Xna.Csg
         public override string ToString()
         {
             return Position + ", N=" + Normal;
+        }
+
+        public virtual Vertex Clone()
+        {
+            return new Vertex(Position, Normal);
+        }
+
+        public Vertex Transform(Matrix transformation)
+        {
+            Vector3.Transform(ref Position, ref transformation, out Position);
+            Vector3.TransformNormal(ref Normal, ref transformation, out Normal);
+
+            return this;
         }
     }
 }

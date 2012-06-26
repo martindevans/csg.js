@@ -9,14 +9,14 @@ namespace Xna.Csg.Primitives
     public class Cylinder
         : Prism
     {
-        public Cylinder(uint rotations)
-            : this(rotations, 0, 1, new object[] { "cylinder", rotations })
+        public Cylinder(uint rotations, Func<Vector3, Vector3, Vertex> vertexFactory = null)
+            : this(rotations, 0, 1, new object[] { "cylinder", rotations }, vertexFactory)
         {
 
         }
 
-        internal Cylinder(uint rotations, float initialAngle, float radius, object[] description)
-            : base(1, description, CalculatePoints(rotations + 2, initialAngle, radius))
+        internal Cylinder(uint rotations, float initialAngle, float radius, object[] description, Func<Vector3, Vector3, Vertex> vertexFactory = null)
+            : base(1, description, vertexFactory, CalculatePoints(rotations + 2, initialAngle, radius))
         {
 
         }

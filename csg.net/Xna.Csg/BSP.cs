@@ -18,8 +18,6 @@ namespace Xna.Csg
             }
         }
 
-        public event Action OnChange;
-
         Node root;
         public BoundingBox? Bounds
         {
@@ -94,7 +92,7 @@ namespace Xna.Csg
                 .Select(a =>
                     new Polygon(
                         a.Vertices.Select(v =>
-                            new Vertex(Vector3.Transform(v.Position, transformation), Vector3.TransformNormal(v.Normal, transformation))
+                            v.Clone().Transform(transformation)
                         )
                     )
                 );
@@ -105,15 +103,7 @@ namespace Xna.Csg
                 CreateDescription("transform", description, transformation.M11, transformation.M12, transformation.M13, transformation.M14, transformation.M21, transformation.M22, transformation.M23, transformation.M24, transformation.M31, transformation.M32, transformation.M33, transformation.M34, transformation.M41, transformation.M42, transformation.M43, transformation.M44)
             );
             
-            InvokeChange();
-
             return b;
-        }
-
-        private void InvokeChange()
-        {
-            if (OnChange != null)
-                OnChange();
         }
 
         #region mutation
@@ -153,7 +143,6 @@ namespace Xna.Csg
                 Bounds = bInput.Bounds;
 
             description = CreateDescription("union", description, bInput.description);
-            InvokeChange();
         }
 
         public virtual void Subtract(BSP bInput)
@@ -174,7 +163,6 @@ namespace Xna.Csg
             Bounds = MeasureBounds(this);
 
             description = CreateDescription("subtract", description, bInput.description);
-            InvokeChange();
         }
 
         public virtual void Intersect(BSP bInput)
@@ -214,7 +202,6 @@ namespace Xna.Csg
                 Bounds = null;
 
             description = CreateDescription("intersect", description, bInput.description);
-            InvokeChange();
         }
 
         public virtual void Clear()
@@ -223,7 +210,6 @@ namespace Xna.Csg
             Bounds = null;
 
             description = new object[0];
-            InvokeChange();
         }
         #endregion
 
@@ -275,7 +261,7 @@ namespace Xna.Csg
 
                 //flip polygons
                 for (int i = 0; i < polygons.Count; i++)
-                    polygons[i] = polygons[i].Flip();
+                    polygons[i].Flip();
 
                 //flip splitplane
                 splitPlane = new Plane(-splitPlane.Value.Normal, -splitPlane.Value.D);

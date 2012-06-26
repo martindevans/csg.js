@@ -77,33 +77,33 @@ namespace Xna.Csg
             }
         }
 
-        public static void ToTriangleList<V, I>(this ICsgProvider tree, Func<Vector3, Vector3, V> positionNormalToVertex, Func<V, I> insertVertex, Action<I, I, I> createTriangle)
+        public static void ToTriangleList<V, I>(this ICsgProvider tree, Func<Vertex, V> createVertex, Func<V, I> insertVertex, Action<I, I, I> createTriangle)
         {
             foreach (var polygon in tree.Polygons)
             {
-                var indices = polygon.Vertices.Select(a => positionNormalToVertex(a.Position, a.Normal)).Select(a => insertVertex(a)).ToArray();
+                var indices = polygon.Vertices.Select(createVertex).Select(insertVertex).ToArray();
 
-                //Triangulate out from one corner
-                for (int i = 2; i < indices.Length; i++)
-                {
-                    createTriangle(indices[0], indices[i - 1], indices[i]);
-                }
-
-                ////alternating direction triangles
-                //int topIndex = indices.Length - 1;
-                //int bottomIndex = 0;
-                //while (topIndex > bottomIndex + 1)
+                ////Triangulate out from one corner
+                //for (int i = 2; i < indices.Length; i++)
                 //{
-                //    createTriangle(indices[topIndex], indices[bottomIndex], indices[bottomIndex + 1]);
-
-                //    if (topIndex - 1 != bottomIndex + 1)
-                //        createTriangle(indices[topIndex], indices[bottomIndex + 1], indices[topIndex - 1]);
-                //    else
-                //        break;
-
-                //    topIndex--;
-                //    bottomIndex++;
+                //    createTriangle(indices[0], indices[i - 1], indices[i]);
                 //}
+
+                //alternating direction triangles
+                int topIndex = indices.Length - 1;
+                int bottomIndex = 0;
+                while (topIndex > bottomIndex + 1)
+                {
+                    createTriangle(indices[topIndex], indices[bottomIndex], indices[bottomIndex + 1]);
+
+                    if (topIndex - 1 != bottomIndex + 1)
+                        createTriangle(indices[topIndex], indices[bottomIndex + 1], indices[topIndex - 1]);
+                    else
+                        break;
+
+                    topIndex--;
+                    bottomIndex++;
+                }
             }
         }
 
