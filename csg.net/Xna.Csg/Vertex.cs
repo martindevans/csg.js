@@ -37,12 +37,12 @@ namespace Xna.Csg
             return new Vertex(Position, Normal);
         }
 
-        public Vertex Transform(Matrix transformation)
+        public virtual Vertex Transform(Matrix transformation)
         {
-            Vector3.Transform(ref Position, ref transformation, out Position);
-            Vector3.TransformNormal(ref Normal, ref transformation, out Normal);
-
-            return this;
+            return new Vertex(
+                Vector3.Transform(Position, transformation),
+                Vector3.TransformNormal(Normal, transformation)
+            );
         }
     }
 }

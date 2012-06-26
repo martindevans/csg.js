@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Bounds.cs" />
     <Compile Include="ConvexHull.cs" />
+    <Compile Include="CubeTest.cs" />
     <Compile Include="Descriptions.cs" />
     <Compile Include="Normals.cs" />
     <Compile Include="PolygonTest.cs" />

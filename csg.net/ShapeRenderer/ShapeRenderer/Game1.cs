@@ -94,7 +94,7 @@ namespace ShapeRenderer
 
             wireframeState = new RasterizerState()
             {
-                FillMode = Microsoft.Xna.Framework.Graphics.FillMode.WireFrame,
+                FillMode = FillMode.WireFrame,
                 CullMode = CullMode.CullClockwiseFace,
             };
         }

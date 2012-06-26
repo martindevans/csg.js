@@ -87,15 +87,7 @@ namespace Xna.Csg
 
         public virtual BSP Transform(Matrix transformation)
         {
-            var polys = root
-                .AllPolygons
-                .Select(a =>
-                    new Polygon(
-                        a.Vertices.Select(v =>
-                            v.Clone().Transform(transformation)
-                        )
-                    )
-                );
+            var polys = root.AllPolygons.Select(a => new Polygon(a.Vertices.Select(v => v.Clone().Transform(transformation))));
 
             BSP b = new BSP(
                 polys,
