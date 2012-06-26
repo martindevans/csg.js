@@ -33,5 +33,14 @@ namespace ShapeRenderer
 
             return new ColorVertex(pos, norm, color);
         }
+
+        public override Vertex Transform(Matrix transformation)
+        {
+            return new ColorVertex(
+                Vector3.Transform(Position, transformation),
+                Vector3.TransformNormal(Normal, transformation),
+                Color
+            );
+        }
     }
 }
