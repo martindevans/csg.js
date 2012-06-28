@@ -77,11 +77,11 @@ namespace Xna.Csg
             }
         }
 
-        public static void ToTriangleList<V, I>(this ICsgProvider tree, Func<Vertex, V> createVertex, Func<V, I> insertVertex, Action<I, I, I> createTriangle)
+        public static void ToTriangleList<V, I>(this ICsgProvider tree, Func<Polygon, Vertex, V> createVertex, Func<V, I> insertVertex, Action<I, I, I> createTriangle)
         {
             foreach (var polygon in tree.Polygons)
             {
-                var indices = polygon.Vertices.Select(createVertex).Select(insertVertex).ToArray();
+                var indices = polygon.Vertices.Select(v => createVertex(polygon, v)).Select(insertVertex).ToArray();
 
                 ////Triangulate out from one corner
                 //for (int i = 2; i < indices.Length; i++)
@@ -105,6 +105,15 @@ namespace Xna.Csg
                     bottomIndex++;
                 }
             }
+        }
+
+        public static void ToTriangleList<V, I>(this ICsgProvider tree, Func<Vertex, V> createVertex, Func<V, I> insertVertex, Action<I, I, I> createTriangle)
+        {
+            tree.ToTriangleList(
+                (p, v) => createVertex(v),
+                insertVertex,
+                createTriangle
+            );
         }
 
         public static void ToListLine<V, I>(this ICsgProvider tree, Func<Vector3, Vector3, V> positionNormalToVertex, Func<V, I> insertVertex, Action<I, I> createLine)
