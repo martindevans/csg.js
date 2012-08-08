@@ -58,7 +58,12 @@ namespace Xna.Csg
 
         public BSP Clone()
         {
-            return new BSP(root.Clone(), Bounds, description, _createDescription);
+            return Clone(a => a.Clone());
+        }
+
+        public BSP Clone(Func<Vertex, Vertex> clone)
+        {
+            return new BSP(root.Clone(clone), Bounds, description, _createDescription);
         }
         #endregion
 
@@ -102,7 +107,7 @@ namespace Xna.Csg
         public virtual void Union(BSP bInput)
         {
             var a = this.root;
-            var b = bInput.root.Clone();
+            var b = bInput.root.Clone(null);
 
             a.ClipTo(b);
             b.ClipTo(a);
@@ -139,9 +144,12 @@ namespace Xna.Csg
 
         public virtual void Subtract(BSP bInput)
         {
+            if (!root.AllPolygons.Any())
+                return;
+
             var a = this.root;
 
-            var b = bInput.root.Clone();
+            var b = bInput.root.Clone(null);
 
             a.Invert();
             a.ClipTo(b);
@@ -159,8 +167,11 @@ namespace Xna.Csg
 
         public virtual void Intersect(BSP bInput)
         {
+            if (!root.AllPolygons.Any())
+                return;
+
             var a = this.root;
-            var b = bInput.root.Clone();
+            var b = bInput.root.Clone(null);
 
             a.Invert();
             b.ClipTo(a);
@@ -366,20 +377,22 @@ namespace Xna.Csg
                 }
             }
 
-            public Node Clone()
+            public Node Clone(Func<Vertex, Vertex> clone)
             {
+                clone = clone ?? (a => a.Clone());
+
                 Node n = new Node();
 
                 if (splitPlane.HasValue)
                     n.splitPlane = splitPlane.Value;
 
                 if (front != null)
-                    n.front = front.Clone();
+                    n.front = front.Clone(clone);
 
                 if (back != null)
-                    n.back = back.Clone();
+                    n.back = back.Clone(clone);
 
-                n.polygons.AddRange(polygons.Select(a => a.Clone()));
+                n.polygons.AddRange(polygons.Select(a => a.Clone(clone)));
 
                 return n;
             }

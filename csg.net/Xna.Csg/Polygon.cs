@@ -59,7 +59,14 @@ namespace Xna.Csg
 
         public Polygon Clone()
         {
-            return new Polygon(Vertices.Select(a => a.Clone()));
+            return Clone(null);
+        }
+
+        public Polygon Clone(Func<Vertex, Vertex> clone = null)
+        {
+            clone = clone ?? (a => a.Clone());
+
+            return new Polygon(Vertices.Select(a => clone(a)));
         }
 
         public static bool IsDegenerateSet(IEnumerable<Vertex> set)

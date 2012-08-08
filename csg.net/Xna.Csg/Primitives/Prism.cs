@@ -29,7 +29,7 @@ namespace Xna.Csg.Primitives
             Footprint = points;
         }
 
-        internal static IEnumerable<Polygon> CreatePolygons(float height, Vector2[] points, Func<Vector3, Vector3, Vertex> vertexFactory = null)
+        internal static IEnumerable<Polygon> CreatePolygons(float height, Vector2[] points, Func<Vector3, Vector3, Vertex> vertexFactory)
         {
             vertexFactory = vertexFactory ?? ((p, n) => new Vertex(p, n));
 
@@ -39,7 +39,7 @@ namespace Xna.Csg.Primitives
             float dot = Vector3.Dot(Vector3.Up, top.Plane.Normal);
             if (dot < 0)
             {
-                foreach (var item in CreatePolygons(height, points.Reverse().ToArray()))
+                foreach (var item in CreatePolygons(height, points.Reverse().ToArray(), vertexFactory))
                     yield return item;
                 yield break;
             }
