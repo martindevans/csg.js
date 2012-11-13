@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Xna.Csg.Primitives;
 
 namespace Xna.Csg
 {
     public class BSP
         :ICsgProvider
     {
-        bool _createDescription;
-        object[] description;
+        readonly bool _createDescription;
+        object[] _description;
         public IEnumerable<object> Description
         {
             get
             {
-                return description;
+                return _description;
             }
         }
 
-        Node root;
+        Node _root;
         public BoundingBox? Bounds
         {
             get;
@@ -28,7 +29,7 @@ namespace Xna.Csg
         {
             get
             {
-                return root.AllPolygons;
+                return _root.AllPolygons;
             }
         }
 
@@ -43,17 +44,17 @@ namespace Xna.Csg
             : this()
         {
             _createDescription = createDescription;
-            root.Build(polygons);
-            this.Bounds = bounds;
-            this.description = description;
+            _root.Build(polygons);
+            Bounds = bounds;
+            _description = description;
         }
 
         private BSP(Node root, BoundingBox? bounds, object[] description, bool createDescription = true)
         {
-            this.root = root;
-            this.Bounds = bounds;
-            this.description = description;
-            this._createDescription = createDescription;
+            _root = root;
+            Bounds = bounds;
+            _description = description;
+            _createDescription = createDescription;
         }
 
         public BSP Clone()
@@ -63,7 +64,7 @@ namespace Xna.Csg
 
         public BSP Clone(Func<Vertex, Vertex> clone)
         {
-            return new BSP(root.Clone(clone), Bounds, description, _createDescription);
+            return new BSP(_root.Clone(clone), Bounds, _description, _createDescription);
         }
         #endregion
 
@@ -92,12 +93,12 @@ namespace Xna.Csg
 
         public virtual BSP Transform(Matrix transformation)
         {
-            var polys = root.AllPolygons.Select(a => new Polygon(a.Vertices.Select(v => v.Clone().Transform(transformation))));
+            var polys = _root.AllPolygons.Select(a => new Polygon(a.Vertices.Select(v => v.Clone().Transform(transformation))));
 
             BSP b = new BSP(
                 polys,
                 Bounds.Value.Transform(transformation),
-                CreateDescription("transform", description, transformation.M11, transformation.M12, transformation.M13, transformation.M14, transformation.M21, transformation.M22, transformation.M23, transformation.M24, transformation.M31, transformation.M32, transformation.M33, transformation.M34, transformation.M41, transformation.M42, transformation.M43, transformation.M44)
+                CreateDescription("transform", _description, transformation.M11, transformation.M12, transformation.M13, transformation.M14, transformation.M21, transformation.M22, transformation.M23, transformation.M24, transformation.M31, transformation.M32, transformation.M33, transformation.M34, transformation.M41, transformation.M42, transformation.M43, transformation.M44)
             );
             
             return b;
@@ -106,8 +107,8 @@ namespace Xna.Csg
         #region mutation
         public virtual void Union(BSP bInput)
         {
-            var a = this.root;
-            var b = bInput.root.Clone(null);
+            var a = _root;
+            var b = bInput._root.Clone(null);
 
             a.ClipTo(b);
             b.ClipTo(a);
@@ -139,17 +140,17 @@ namespace Xna.Csg
             else
                 Bounds = bInput.Bounds;
 
-            description = CreateDescription("union", description, bInput.description);
+            _description = CreateDescription("union", _description, bInput._description);
         }
 
         public virtual void Subtract(BSP bInput)
         {
-            if (!root.AllPolygons.Any())
+            if (!_root.AllPolygons.Any())
                 return;
 
-            var a = this.root;
+            var a = this._root;
 
-            var b = bInput.root.Clone(null);
+            var b = bInput._root.Clone(null);
 
             a.Invert();
             a.ClipTo(b);
@@ -162,16 +163,16 @@ namespace Xna.Csg
 
             Bounds = MeasureBounds(this);
 
-            description = CreateDescription("subtract", description, bInput.description);
+            _description = CreateDescription("subtract", _description, bInput._description);
         }
 
         public virtual void Intersect(BSP bInput)
         {
-            if (!root.AllPolygons.Any())
+            if (!_root.AllPolygons.Any())
                 return;
 
-            var a = this.root;
-            var b = bInput.root.Clone(null);
+            var a = this._root;
+            var b = bInput._root.Clone(null);
 
             a.Invert();
             b.ClipTo(a);
@@ -204,15 +205,57 @@ namespace Xna.Csg
             else
                 Bounds = null;
 
-            description = CreateDescription("intersect", description, bInput.description);
+            _description = CreateDescription("intersect", _description, bInput._description);
         }
 
         public virtual void Clear()
         {
-            root = new Node();
+            _root = new Node();
             Bounds = null;
 
-            description = new object[0];
+            _description = new object[0];
+        }
+
+        public virtual void Split(out BSP topLeftFront, out BSP topLeftBack, out BSP topRightBack, out BSP topRightFront, out BSP bottomLeftFront, out BSP bottomLeftBack, out BSP bottomRightBack, out BSP bottomRightFront, Func<Vector3, Vector3, Vertex> vertexFactory = null)
+        {
+            if (!Bounds.HasValue)
+                throw new InvalidOperationException("Cannot split a BSP tree without bounds");
+            vertexFactory = vertexFactory ?? ((p, n) => new Vertex(p, n));
+
+            var bounds = Bounds.Value;
+            var size = (bounds.Max - bounds.Min);
+
+            float halfWidth = size.X / 2;
+            float halfHeight = size.Y / 2;
+            float halfDepth = size.Z / 2;
+
+            float qtrWidth = halfWidth / 2;
+            float qtrHeight = halfHeight / 2;
+            float qtrDepth = halfDepth / 2;
+
+            topLeftFront = new Cube(vertexFactory).Transform(Matrix.CreateScale(halfWidth, halfHeight, halfDepth) * Matrix.CreateTranslation(-qtrWidth, qtrHeight, -qtrDepth));
+            topLeftFront.Intersect(this);
+
+            topLeftBack = new Cube(vertexFactory).Transform(Matrix.CreateScale(halfWidth, halfHeight, halfDepth) * Matrix.CreateTranslation(-qtrWidth, qtrHeight, qtrDepth));
+            topLeftBack.Intersect(this);
+
+            topRightFront = new Cube(vertexFactory).Transform(Matrix.CreateScale(halfWidth, halfHeight, halfDepth) * Matrix.CreateTranslation(qtrWidth, qtrHeight, -qtrDepth));
+            topRightFront.Intersect(this);
+
+            topRightBack = new Cube(vertexFactory).Transform(Matrix.CreateScale(halfWidth, halfHeight, halfDepth) * Matrix.CreateTranslation(qtrWidth, qtrHeight, qtrDepth));
+            topRightBack.Intersect(this);
+
+            bottomLeftFront = new Cube(vertexFactory).Transform(Matrix.CreateScale(halfWidth, halfHeight, halfDepth) * Matrix.CreateTranslation(-qtrWidth, -qtrHeight, -qtrDepth));
+            bottomLeftFront.Intersect(this);
+
+            bottomLeftBack = new Cube(vertexFactory).Transform(Matrix.CreateScale(halfWidth, halfHeight, halfDepth) * Matrix.CreateTranslation(-qtrWidth, -qtrHeight, qtrDepth));
+            bottomLeftBack.Intersect(this);
+
+            bottomRightFront = new Cube(vertexFactory).Transform(Matrix.CreateScale(halfWidth, halfHeight, halfDepth) * Matrix.CreateTranslation(qtrWidth, -qtrHeight, -qtrDepth));
+            bottomRightFront.Intersect(this);
+
+            bottomRightBack = new Cube(vertexFactory).Transform(Matrix.CreateScale(halfWidth, halfHeight, halfDepth) * Matrix.CreateTranslation(qtrWidth, -qtrHeight, qtrDepth));
+            bottomRightBack.Intersect(this);
         }
         #endregion
 
@@ -223,7 +266,7 @@ namespace Xna.Csg
                 float? boundsDistance = ray.Intersects(Bounds.Value);
 
                 if (boundsDistance.HasValue)
-                    return root.RayCast(ray);
+                    return _root.RayCast(ray);
             }
 
             return null;
@@ -281,25 +324,25 @@ namespace Xna.Csg
                 back = tmp;
             }
 
-            public IEnumerable<Polygon> ClipPolygons(IList<Polygon> polygons)
+            private IEnumerable<Polygon> ClipPolygons(IList<Polygon> polygons)
             {
                 if (!splitPlane.HasValue)
                     return polygons.ToArray();
 
-                List<Polygon> front = new List<Polygon>();
-                List<Polygon> back = new List<Polygon>();
+                List<Polygon> frontClippedPolygons = new List<Polygon>();
+                List<Polygon> backClippedPolygons = new List<Polygon>();
 
                 for (int i = 0; i < polygons.Count; i++)
-                    splitPlane.Value.SplitPolygon(polygons[i], front, back, front, back);
+                    splitPlane.Value.SplitPolygon(polygons[i], frontClippedPolygons, backClippedPolygons, frontClippedPolygons, backClippedPolygons);
 
-                if (this.front != null)
-                    front = this.front.ClipPolygons(front).ToList();
-                if (this.back != null)
-                    back = this.back.ClipPolygons(back).ToList();
+                if (front != null)
+                    frontClippedPolygons = front.ClipPolygons(frontClippedPolygons).ToList();
+                if (back != null)
+                    backClippedPolygons = back.ClipPolygons(backClippedPolygons).ToList();
                 else
-                    back.Clear();
+                    backClippedPolygons.Clear();
 
-                return front.Concat(back);
+                return frontClippedPolygons.Concat(backClippedPolygons);
             }
 
             public void ClipTo(Node other)
@@ -313,7 +356,7 @@ namespace Xna.Csg
             }
 
             [ThreadStatic]
-            private static Random random;
+            private static Random _random;
             private static Polygon SelectSplitPlane(IEnumerable<Polygon> polygons)
             {
                 int count = polygons.Count();
@@ -324,10 +367,10 @@ namespace Xna.Csg
                 if (count == 1)
                     return polygons.First();
 
-                if (random == null)
-                    random = new Random();
+                if (_random == null)
+                    _random = new Random();
 
-                return polygons.Skip(random.Next(0, count - 1)).First();
+                return polygons.Skip(_random.Next(0, count - 1)).First();
             }
 
             private static void Build(Node node, IEnumerable<Polygon> polygons, Queue<KeyValuePair<Node, IEnumerable<Polygon>>> todo)
@@ -401,10 +444,7 @@ namespace Xna.Csg
             #region query
             private float? RayCastNode(Node n, Ray r)
             {
-                if (n == null)
-                    return null;
-
-                return n.RayCast(r);
+                return n == null ? null : n.RayCast(r);
             }
 
             private bool RayCastItems(List<Polygon> polygons, Vector3 planeIntersectionPoint)

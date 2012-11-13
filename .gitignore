@@ -4,6 +4,7 @@
 *.xnb
 *.sln.docstates
 *.cache
+csg.net/_Resharper*
 csg.net/Xna.Csg/bin
 csg.net/Xna.Csg/obj
 csg.net/ShapeRenderer/ShapeRenderer/bin

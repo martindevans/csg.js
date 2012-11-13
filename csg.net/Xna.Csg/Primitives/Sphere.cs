@@ -83,6 +83,10 @@ namespace Xna.Csg.Primitives
             Vertex bcMid = polygon.Vertices[1].Interpolate(polygon.Vertices[2], 0.5f);
             Vertex caMid = polygon.Vertices[2].Interpolate(polygon.Vertices[0], 0.5f);
 
+            abMid.Position.Normalize();
+            bcMid.Position.Normalize();
+            caMid.Position.Normalize();
+
             yield return new Polygon(polygon.Vertices[0], abMid, caMid);
             yield return new Polygon(abMid, polygon.Vertices[1], bcMid);
             yield return new Polygon(bcMid, polygon.Vertices[2], caMid);
