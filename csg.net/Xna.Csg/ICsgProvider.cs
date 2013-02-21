@@ -7,7 +7,7 @@ namespace Xna.Csg
 {
     public interface ICsgProvider
     {
-        void Union(BSP bsp);
+        void Union(BSP brush);
 
         void Intersect(BSP bsp);
 

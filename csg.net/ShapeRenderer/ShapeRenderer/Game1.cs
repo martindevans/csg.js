@@ -21,21 +21,14 @@ namespace ShapeRenderer
         float controlSpeed = 0.03f;
 
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
 
-        private BSP[] shapes;
         BSP shapeToRender;
 
-        Vector2 rotation;
         BasicEffect effect;
         RasterizerState wireframeState;
         RasterizerState solidState;
         Matrix projection;
         Matrix view;
-
-        BSP sphere;
-
-        Vector3? mouseIntersectionPosition;
 
         public Game1()
         {
@@ -53,55 +46,27 @@ namespace ShapeRenderer
         {
             IsMouseVisible = true;
 
-            const float scale = 0.3f;
-
-            var a = new Cylinder(10, (p, n) => new ColorVertex(p, n, Color.Red)).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale));
-            var b = new Cylinder(10, (p, n) => new ColorVertex(p, n, Color.Green)).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationX(MathHelper.PiOver2));
-            var c = new Cylinder(10, (p, n) => new ColorVertex(p, n, Color.Blue)).Transform(Matrix.CreateScale(5f * scale, 20 * scale, 5f * scale) * Matrix.CreateRotationZ(MathHelper.PiOver2));
-
-            var d = new Cube((p, n) => new ColorVertex(p, n, Color.Black)).Transform(Matrix.CreateScale(15f * scale));
-
-            var e1 = new Sphere(2, (p, n) => new ColorVertex(p, n, Color.White)).Transform(Matrix.CreateScale(1.5f * scale) * Matrix.CreateTranslation(new Vector3(7.5f, 7.5f, 7.5f) * scale));
-            var e2 = new Sphere(2, (p, n) => new ColorVertex(p, n, Color.White)).Transform(Matrix.CreateScale(1.5f * scale) * Matrix.CreateTranslation(new Vector3(-7.5f, 7.5f, 7.5f) * scale));
-            var e3 = new Sphere(2, (p, n) => new ColorVertex(p, n, Color.White)).Transform(Matrix.CreateScale(1.5f * scale) * Matrix.CreateTranslation(new Vector3(7.5f, -7.5f, 7.5f) * scale));
-            var e4 = new Sphere(2, (p, n) => new ColorVertex(p, n, Color.White)).Transform(Matrix.CreateScale(1.5f * scale) * Matrix.CreateTranslation(new Vector3(-7.5f, -7.5f, 7.5f) * scale));
-            var e5 = new Sphere(2, (p, n) => new ColorVertex(p, n, Color.White)).Transform(Matrix.CreateScale(1.5f * scale) * Matrix.CreateTranslation(new Vector3(7.5f, 7.5f, -7.5f) * scale));
-            var e6 = new Sphere(2, (p, n) => new ColorVertex(p, n, Color.White)).Transform(Matrix.CreateScale(1.5f * scale) * Matrix.CreateTranslation(new Vector3(-7.5f, 7.5f, -7.5f) * scale));
-            var e7 = new Sphere(2, (p, n) => new ColorVertex(p, n, Color.White)).Transform(Matrix.CreateScale(1.5f * scale) * Matrix.CreateTranslation(new Vector3(7.5f, -7.5f, -7.5f) * scale));
-            var e8 = new Sphere(2, (p, n) => new ColorVertex(p, n, Color.White)).Transform(Matrix.CreateScale(1.5f * scale) * Matrix.CreateTranslation(new Vector3(-7.5f, -7.5f, -7.5f) * scale));
-
-            var e9 = new Sphere(2, (p, n) => new ColorVertex(p, n, Color.HotPink)).Transform(Matrix.CreateScale(2f * scale));
-
-            var abc = a.Clone();
-            abc.Union(b);
-            abc.Union(c);
-
-            shapeToRender = d;
-            d.Subtract(abc);
-
-            d.Union(e1);
-            d.Union(e2);
-            d.Union(e3);
-            d.Union(e4);
-            d.Union(e5);
-            d.Union(e6);
-            d.Union(e7);
-            d.Union(e8);
-            d.Union(e9);
-
-            BSP topLeftFront, topLeftBack, topRightBack, topRightFront, bottomLeftFront, bottomLeftBack, bottomRightBack, bottomRightFront;
-            d.Split(out topLeftFront, out topLeftBack, out topRightBack, out topRightFront, out bottomLeftFront, out bottomLeftBack, out bottomRightBack, out bottomRightFront);
-            shapes = new[] {topLeftFront, topLeftBack, topRightBack, topRightFront, bottomLeftFront, bottomLeftBack, bottomRightBack, bottomRightFront};
-
-            //shapeToRender.Intersect(new Prism(1, new Vector2[]
-            //{
-            //    new Vector2(-1.2f, -1.2f),
-            //    new Vector2(1.2f, -1.2f),
-            //    new Vector2(1.2f, 1.2f),
-            //    new Vector2(0f, 2f),
-            //    new Vector2(-1.2f, 1.2f),
-            //}));
-            //shapeToRender.Intersect(new Cylinder(1));
+            shapeToRender = new Mesh(new[]
+                {
+                    new Vector3(-250, 0, -250),
+                    new Vector3(250, 0, -250),
+                    new Vector3(250, 0, 250),
+                    new Vector3(-250, 0, 250),
+                    new Vector3(-250, 500, -250),
+                    new Vector3(250, 500, -250),
+                    new Vector3(250, 500, 250),
+                    new Vector3(-250, 500, 250)
+                },
+                new[] {
+                    0, 1, 2, 0, 2, 3, //Bottom
+                    4, 6, 5, 4, 7, 6, //Top
+                    7, 2, 6, 7, 3, 2, //Front
+                    6, 1, 5, 6, 2, 1, //Right
+                    4, 0, 7, 7, 0, 3, //Right
+                    4, 5, 1, 4, 1, 0, //Back
+                },
+                (i, v) => new Vertex(v, Vector3.Zero)
+            );
 
             base.Initialize();
         }
@@ -112,8 +77,6 @@ namespace ShapeRenderer
         /// </summary>
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
             effect = new BasicEffect(GraphicsDevice);
 
             view = Matrix.CreateLookAt(new Vector3(3, 3, 3), Vector3.Zero, Vector3.Up);
@@ -132,39 +95,6 @@ namespace ShapeRenderer
         }
 
         /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Update(GameTime gameTime)
-        {
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
-                rotation.X += controlSpeed;
-            if (Keyboard.GetState().IsKeyDown(Keys.D))
-                rotation.X -= controlSpeed;
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-                rotation.Y += controlSpeed;
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-                rotation.Y -= controlSpeed;
-
-            MouseState m = Mouse.GetState();
-            Vector3 start = GraphicsDevice.Viewport.Unproject(new Vector3(m.X, m.Y, 0), projection, view, Matrix.Identity);
-            Vector3 end = GraphicsDevice.Viewport.Unproject(new Vector3(m.X, m.Y, 1), projection, view, Matrix.Identity);
-            Ray r = new Ray(start, Vector3.Normalize(end - start));
-
-            float? distance = r.Intersects(shapeToRender);
-            if (!distance.HasValue)
-                mouseIntersectionPosition = null;
-            else
-                mouseIntersectionPosition = r.Position + r.Direction * distance.Value;
-            Window.Title = mouseIntersectionPosition.HasValue.ToString();
-
-            shapeToRender = shapes[((int)gameTime.TotalGameTime.TotalSeconds) % shapes.Length];
-
-            base.Update(gameTime);
-        }
-
-        /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
@@ -177,7 +107,7 @@ namespace ShapeRenderer
             effect.VertexColorEnabled = true;
             effect.TextureEnabled = false;
 
-            GraphicsDevice.RasterizerState = solidState;
+            GraphicsDevice.RasterizerState = wireframeState;
             GraphicsDevice.DepthStencilState = new DepthStencilState()
             {
                 DepthBufferEnable = true,
@@ -185,10 +115,7 @@ namespace ShapeRenderer
             };
 
             float time = (float)gameTime.TotalGameTime.TotalSeconds / 1.5f;
-            DrawShape(effect, shapeToRender, Matrix.CreateRotationY(time) * Matrix.CreateRotationX(time) * Matrix.CreateTranslation(0, -0.5f, 0), Color.Green);
-
-            //if (mouseIntersectionPosition.HasValue)
-            //    DrawShape(effect, sphere, Matrix.CreateTranslation(mouseIntersectionPosition.Value), Color.Black);
+            DrawShape(effect, shapeToRender, Matrix.CreateScale(0.005f) * Matrix.CreateRotationY(time) * Matrix.CreateRotationX(time) * Matrix.CreateTranslation(0, -0.5f, 0), Color.Green);
 
             base.Draw(gameTime);
         }

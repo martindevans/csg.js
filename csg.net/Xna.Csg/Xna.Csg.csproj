@@ -99,6 +99,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Polygon.cs" />
     <Compile Include="Primitives\Cylinder.cs" />
+    <Compile Include="Primitives\Mesh.cs" />
     <Compile Include="Primitives\Prism.cs" />
     <Compile Include="Primitives\Sphere.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

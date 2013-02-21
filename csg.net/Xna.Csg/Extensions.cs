@@ -188,6 +188,26 @@ namespace Xna.Csg
             return b;
         }
 
+        public static BoundingBox Bounds(this Vector3[] points)
+        {
+            Vector3 min = new Vector3(float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue);
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                var p = points[i];
+                min.X = Math.Min(min.X, p.X);
+                min.Y = Math.Min(min.Y, p.Y);
+                min.Z = Math.Min(min.Z, p.Z);
+
+                max.X = Math.Min(max.X, p.X);
+                max.Y = Math.Min(max.Y, p.Y);
+                max.Z = Math.Min(max.Z, p.Z);
+            }
+
+            return new BoundingBox(min, max);
+        }
+
         /// <summary>
         /// enumerates the start and then the end
         /// </summary>
