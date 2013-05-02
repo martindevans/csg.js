@@ -213,7 +213,10 @@ namespace Xna.Csg
             _root = new Node();
             Bounds = null;
 
-            _description = new object[0];
+            if (_createDescription)
+                _description = new object[0];
+            else
+                _description = null;
         }
 
         public virtual void Split(out BSP topLeftFront, out BSP topLeftBack, out BSP topRightBack, out BSP topRightFront, out BSP bottomLeftFront, out BSP bottomLeftBack, out BSP bottomRightBack, out BSP bottomRightFront, Func<Vector3, Vector3, Vertex> vertexFactory = null)
@@ -491,7 +494,7 @@ namespace Xna.Csg
                 float distance = r.Position.Distance(splitPlane.Value);
                 Vector3 planeIntersectionPoint = r.Position + r.Direction * distance;
 
-                if (distance < -Extensions.Epsilon)
+                if (distance < -Extensions.EPSILON)
                 {
                     var b = RayCastNode(back, r);
                     if (b.HasValue)
@@ -507,7 +510,7 @@ namespace Xna.Csg
                             return f;
                     }
                 }
-                else if (distance > Extensions.Epsilon)
+                else if (distance > Extensions.EPSILON)
                 {
                     var f = RayCastNode(front, new Ray(r.Position + r.Direction * distance, r.Direction));
                     if (f.HasValue)

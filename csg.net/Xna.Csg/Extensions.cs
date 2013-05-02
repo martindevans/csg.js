@@ -7,7 +7,7 @@ namespace Xna.Csg
 {
     public static class Extensions
     {
-        public const float Epsilon = 1e-3f;
+        public const float EPSILON = 1e-3f;
 
         public static void SplitPolygon(this Plane plane, Polygon polygon, IList<Polygon> coPlanarFront, IList<Polygon> coPlanarBack, IList<Polygon> front, IList<Polygon> back)
         {
@@ -22,9 +22,9 @@ namespace Xna.Csg
                 {
                     var t = polygon.Vertices[i].Position.Distance(plane);
 
-                    var type = (t < -Epsilon)
+                    var type = (t < -EPSILON)
                                    ? PolygonType.Back
-                                   : (t > Epsilon) ? PolygonType.Front : PolygonType.Coplanar;
+                                   : (t > EPSILON) ? PolygonType.Front : PolygonType.Coplanar;
                     polygonType |= type;
                     types.Add(type);
                 }
@@ -200,9 +200,9 @@ namespace Xna.Csg
                 min.Y = Math.Min(min.Y, p.Y);
                 min.Z = Math.Min(min.Z, p.Z);
 
-                max.X = Math.Min(max.X, p.X);
-                max.Y = Math.Min(max.Y, p.Y);
-                max.Z = Math.Min(max.Z, p.Z);
+                max.X = Math.Max(max.X, p.X);
+                max.Y = Math.Max(max.Y, p.Y);
+                max.Z = Math.Max(max.Z, p.Z);
             }
 
             return new BoundingBox(min, max);

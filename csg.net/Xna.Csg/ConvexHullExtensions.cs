@@ -59,7 +59,7 @@ namespace Xna.Csg
                 }
             }
 
-            var leftOuterPointers = new List<Vector2>();
+            var leftOuterPoints = new List<Vector2>();
             var rightOuterPoints = new List<Vector2>();
 
             var leftDir = Vector2.Normalize(furthest - baseLineAnchor);
@@ -70,12 +70,12 @@ namespace Xna.Csg
                 if (item == furthest)
                     continue;
                 if (IsLeftOfLine(item, baseLineAnchor, leftDir))
-                    leftOuterPointers.Add(item);
+                    leftOuterPoints.Add(item);
                 else if (IsLeftOfLine(item, furthest, rightDir)) //Left of a downwards pointing line is the right
                     rightOuterPoints.Add(item);
             }
 
-            foreach (var item in Quickhull(leftOuterPointers, baseLineAnchor, leftDir, furthest))
+            foreach (var item in Quickhull(leftOuterPoints, baseLineAnchor, leftDir, furthest))
                 yield return item;
 
             yield return furthest;
